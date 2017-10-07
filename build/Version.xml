@@ -1,0 +1,21 @@
+﻿<Project>
+  <PropertyGroup>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <Company>MangleSocks</Company>
+    <Product>MangleSocks</Product>
+  </PropertyGroup>
+  
+  <!-- Do not change anything below this comment -->
+  <PropertyGroup>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+  
+  <Target Name="GenerateVersionInfo" BeforeTargets="Build">
+    <Exec Command="dotnet &quot;$(MSBuildThisFileDirectory)\dotnet-project-version.dll&quot; -s=git -t=cs -v=$(VersionPrefix) -m=$(VersionSuffix)" />
+  </Target>
+</Project>
