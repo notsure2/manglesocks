@@ -15,7 +15,11 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
   
-  <Target Name="GenerateVersionInfo" BeforeTargets="Build">
+  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
     <Exec Command="dotnet &quot;$(MSBuildThisFileDirectory)\dotnet-project-version.dll&quot; -s=git -t=cs -v=$(VersionPrefix) -m=$(VersionSuffix)" />
   </Target>
+  
+  <ItemGroup>
+    <Compile Include="Properties\VersionInfo.cs" Condition="'$(EnableDefaultItems)' == 'false' OR '$(EnableDefaultItems)' == ''" />
+  </ItemGroup>
 </Project>
