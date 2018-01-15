@@ -41,14 +41,13 @@ namespace MangleSocks.Cli
                 var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger(typeof(Program).Name);
 
-                Console.Title = "MangleSocks v" + s_Version;
                 logger.LogInformation("Starting version " + s_Version);
+                logger.LogInformation("** Press CTRL+C to shutdown.");
                 args.LogProperties(logger);
 
                 using (var server = serviceProvider.GetRequiredService<SocksServer>())
                 {
                     server.Start();
-                    Console.Title += " - CTRL+C to stop";
 
                     var waitHandle = new ManualResetEventSlim(false);
                     Console.TreatControlCAsInput = false;
