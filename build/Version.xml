@@ -16,7 +16,7 @@
   </PropertyGroup>
   
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
-    <Exec Command="dotnet &quot;$(MSBuildThisFileDirectory)\dotnet-project-version.dll&quot; -s=git -t=cs -v=$(VersionPrefix) -m=$(VersionSuffix)" />
+    <Exec Command="dotnet &quot;$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), dotnet-project-version.dll))&quot; -s=git -t=cs -v=$(VersionPrefix) -m=$(VersionSuffix)" />
   </Target>
   
   <ItemGroup>
