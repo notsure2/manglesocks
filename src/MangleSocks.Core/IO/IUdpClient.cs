@@ -7,7 +7,7 @@ namespace MangleSocks.Core.IO
 {
     public interface IUdpClient : IDisposable
     {
-        Task<SocketReceiveFromResult> ReceiveAsync(byte[] buffer, int offset, int count, EndPoint remoteEndPoint);
+        Task<SocketReceiveFromResult> ReceiveAsync(byte[] buffer, int offset, EndPoint remoteEndPoint);
         Task<int> SendAsync(byte[] buffer, int offset, int count, EndPoint destinationEndPoint);
     }
 }

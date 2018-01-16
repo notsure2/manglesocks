@@ -132,7 +132,6 @@ namespace MangleSocks.Core.Server
                             .ReceiveAsync(
                                 buffer,
                                 0,
-                                buffer.Length,
                                 this._boundClient.BindEndPoint)
                             .ConfigureAwait(false);
 
@@ -179,20 +178,20 @@ namespace MangleSocks.Core.Server
                             if (!await this._interceptor
                                 .TryInterceptOutgoingAsync(
                                     new ArraySegment<byte>(buffer, 0, totalCount),
-                                    datagram.Header.DestinationEndPoint,
+                                    datagram.Header.RemoteEndPoint,
                                     this._relayClient)
                                 .ConfigureAwait(false))
                             {
                                 this._log.LogDebug(
                                     "Sending {0} bytes to {1}",
                                     totalCount,
-                                    datagram.Header.DestinationEndPoint);
+                                    datagram.Header.RemoteEndPoint);
                                 await this._relayClient
                                     .SendAsync(
                                         buffer,
                                         0,
                                         totalCount,
-                                        datagram.Header.DestinationEndPoint)
+                                        datagram.Header.RemoteEndPoint)
                                     .ConfigureAwait(false);
                             }
 
@@ -223,7 +222,6 @@ namespace MangleSocks.Core.Server
                             .ReceiveAsync(
                                 buffer,
                                 DatagramHeader.InternetProtocolV6HeaderLength,
-                                DatagramHeader.MaxUdpSize,
                                 new IPEndPoint(IPAddress.Any, 0))
                             .ConfigureAwait(false);
 

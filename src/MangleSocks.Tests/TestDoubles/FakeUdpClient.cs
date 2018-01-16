@@ -6,14 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using MangleSocks.Core.IO;
+using MangleSocks.Core.Socks;
+using MangleSocks.Tests.Helpers;
 
 namespace MangleSocks.Tests.TestDoubles
 {
     class FakeUdpClient : IBoundUdpClient
     {
         readonly CancellationTokenSource _disposeTokenSource;
-        readonly BufferBlock<QueuedPacket> _queuedPackets;
-        readonly BufferBlock<QueuedPacket> _sentPackets;
+        readonly BufferBlock<QueuedReceivedPacket> _received;
+        readonly BufferBlock<QueuedSentPacket> _sent;
 
         bool _disposed;
 
@@ -22,17 +24,24 @@ namespace MangleSocks.Tests.TestDoubles
         public FakeUdpClient()
         {
             this._disposeTokenSource = new CancellationTokenSource();
-            this._queuedPackets = new BufferBlock<QueuedPacket>();
-            this._sentPackets = new BufferBlock<QueuedPacket>();
+            this._received = new BufferBlock<QueuedReceivedPacket>();
+            this._sent = new BufferBlock<QueuedSentPacket>();
             this.BindEndPoint = FakeEndPoints.CreateLocal();
         }
 
-        public void StageReceivedPacket(EndPoint destination, params byte[] packet)
+        public Datagram StageReceivedDatagram(EndPoint source, EndPoint relayToDestination, params byte[] packet)
         {
-            this._queuedPackets.Post(
-                new QueuedPacket
+            var datagram = Datagram.Create(relayToDestination, packet);
+            this.StageReceivedPacket(source, datagram.ToBytes());
+            return datagram;
+        }
+
+        public void StageReceivedPacket(EndPoint source, params byte[] packet)
+        {
+            this._received.Post(
+                new QueuedReceivedPacket
                 {
-                    Destination = destination,
+                    Source = source,
                     Packet = packet
                 });
         }
@@ -40,25 +49,31 @@ namespace MangleSocks.Tests.TestDoubles
         public async Task<SocketReceiveFromResult> ReceiveAsync(
             byte[] buffer,
             int offset,
-            int count,
             EndPoint remoteEndPoint)
         {
-            var queuedPacket = await this._queuedPackets
+            var queuedPacket = await this._received
                 .ReceiveAsync(this._disposeTokenSource.Token)
                 .ConfigureAwait(false);
             Array.Copy(queuedPacket.Packet, 0, buffer, offset, queuedPacket.Packet.Length);
 
             return new SocketReceiveFromResult
             {
-                RemoteEndPoint = queuedPacket.Destination,
+                RemoteEndPoint = queuedPacket.Source,
                 ReceivedBytes = queuedPacket.Packet.Length
             };
         }
 
+        public Datagram SendDatagram(EndPoint destinationEndPoint, params byte[] buffer)
+        {
+            var datagram = Datagram.Create(destinationEndPoint, buffer);
+            this.Send(destinationEndPoint, datagram.ToBytes());
+            return datagram;
+        }
+
         public void Send(EndPoint destinationEndPoint, params byte[] buffer)
         {
-            this._sentPackets.Post(
-                new QueuedPacket
+            this._sent.Post(
+                new QueuedSentPacket
                 {
                     Destination = destinationEndPoint,
                     Packet = buffer
@@ -69,8 +84,8 @@ namespace MangleSocks.Tests.TestDoubles
         {
             var bytes = new byte[count];
             Array.Copy(buffer, offset, bytes, 0, count);
-            await this._sentPackets.SendAsync(
-                new QueuedPacket
+            await this._sent.SendAsync(
+                new QueuedSentPacket
                 {
                     Destination = destinationEndPoint,
                     Packet = bytes
@@ -79,11 +94,11 @@ namespace MangleSocks.Tests.TestDoubles
             return count;
         }
 
-        public IList<QueuedPacket> WaitForSentPackets(int count)
+        public IList<QueuedSentPacket> WaitForSentPackets(int count, int timeoutInSeconds = 5)
         {
-            var batchBlock = new BatchBlock<QueuedPacket>(count);
-            this._sentPackets.LinkTo(batchBlock, new DataflowLinkOptions { MaxMessages = count });
-            return batchBlock.Receive();
+            var batchBlock = new BatchBlock<QueuedSentPacket>(count);
+            this._sent.LinkTo(batchBlock, new DataflowLinkOptions { MaxMessages = count });
+            return batchBlock.Receive(TimeSpan.FromSeconds(timeoutInSeconds));
         }
 
         public void Dispose()
@@ -98,9 +113,15 @@ namespace MangleSocks.Tests.TestDoubles
             this._disposed = true;
         }
 
-        internal struct QueuedPacket
+        internal struct QueuedSentPacket
         {
             public EndPoint Destination;
+            public byte[] Packet;
+        }
+
+        internal struct QueuedReceivedPacket
+        {
+            public EndPoint Source;
             public byte[] Packet;
         }
     }

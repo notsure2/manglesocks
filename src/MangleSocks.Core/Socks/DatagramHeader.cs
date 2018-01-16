@@ -21,7 +21,12 @@ namespace MangleSocks.Core.Socks
 
         public byte FragmentPosition { get; }
         public bool IsFinalFragment { get; }
-        public EndPoint DestinationEndPoint { get; }
+
+        /// <summary>
+        /// This is the requested destination when relaying packets received from
+        /// the SOCKS client, and the reply source when relaying back to the client.
+        /// </summary>
+        public EndPoint RemoteEndPoint { get; }
 
         public bool IsFragment => this.FragmentPosition != 0;
 
@@ -31,8 +36,8 @@ namespace MangleSocks.Core.Socks
             {
                 int lengthRequired;
 
-                var destinationEndPoint = this.DestinationEndPoint ?? s_EmptyEndPoint;
-                switch (destinationEndPoint)
+                var remoteEndPoint = this.RemoteEndPoint ?? s_EmptyEndPoint;
+                switch (remoteEndPoint)
                 {
                     case IPEndPoint ipv4EndPoint when ipv4EndPoint.Address.AddressFamily == AddressFamily.InterNetwork:
                         lengthRequired = InternetProtocolV4HeaderLength;
@@ -47,19 +52,19 @@ namespace MangleSocks.Core.Socks
                         break;
 
                     default:
-                        throw new InvalidDataException($"Invalid EndPoint type: {destinationEndPoint.GetType().FullName}");
+                        throw new InvalidDataException($"Invalid EndPoint type: {remoteEndPoint.GetType().FullName}");
                 }
                 return lengthRequired;
             }
         }
 
-        public DatagramHeader(EndPoint destinationEndPoint) : this(0, false, destinationEndPoint) { }
+        public DatagramHeader(EndPoint remoteEndPoint) : this(0, false, remoteEndPoint) { }
 
-        public DatagramHeader(byte fragmentPosition, bool isFinalFragment, EndPoint destinationEndPoint)
+        public DatagramHeader(byte fragmentPosition, bool isFinalFragment, EndPoint remoteEndPoint)
         {
             this.FragmentPosition = fragmentPosition;
             this.IsFinalFragment = fragmentPosition != 0 && isFinalFragment;
-            this.DestinationEndPoint = destinationEndPoint ?? s_EmptyEndPoint;
+            this.RemoteEndPoint = remoteEndPoint ?? s_EmptyEndPoint;
         }
 
         public int WriteTo(ArraySegment<byte> buffer)
@@ -87,8 +92,8 @@ namespace MangleSocks.Core.Socks
             }
             buffer.Array[index++] = fragment;
 
-            var destinationEndPoint = this.DestinationEndPoint ?? s_EmptyEndPoint;
-            destinationEndPoint.ToBytes(buffer.Array, index);
+            var remoteEndPoint = this.RemoteEndPoint ?? s_EmptyEndPoint;
+            remoteEndPoint.ToBytes(buffer.Array, index);
 
             return lengthRequired;
         }
@@ -122,9 +127,9 @@ namespace MangleSocks.Core.Socks
             var addressType = (AddressType)buffer.Array[buffer.Offset + 3];
 
             var packetStream = new BufferReadOnlyStream(buffer.Array, buffer.Offset + 4, buffer.Count - 4);
-            var destinationEndPoint = packetStream.ReadEndPoint(addressType, bufferPool);
+            var remoteEndPoint = packetStream.ReadEndPoint(addressType, bufferPool);
 
-            return new DatagramHeader(fragmentPosition, isFinalFragment, destinationEndPoint);
+            return new DatagramHeader(fragmentPosition, isFinalFragment, remoteEndPoint);
         }
 
         public override bool Equals(object obj)
@@ -136,7 +141,7 @@ namespace MangleSocks.Core.Socks
         {
             return this.FragmentPosition == other.FragmentPosition &&
                    this.IsFinalFragment == other.IsFinalFragment &&
-                   EqualityComparer<EndPoint>.Default.Equals(this.DestinationEndPoint, other.DestinationEndPoint);
+                   EqualityComparer<EndPoint>.Default.Equals(this.RemoteEndPoint, other.RemoteEndPoint);
         }
 
         public override int GetHashCode()
@@ -146,7 +151,7 @@ namespace MangleSocks.Core.Socks
             hashCode = hashCode * -1521134295 + this.FragmentPosition.GetHashCode();
             hashCode = hashCode * -1521134295 + this.IsFinalFragment.GetHashCode();
             hashCode = hashCode * -1521134295
-                       + EqualityComparer<EndPoint>.Default.GetHashCode(this.DestinationEndPoint);
+                       + EqualityComparer<EndPoint>.Default.GetHashCode(this.RemoteEndPoint);
             return hashCode;
         }
 
@@ -163,8 +168,8 @@ namespace MangleSocks.Core.Socks
         public override string ToString()
         {
             return this.IsFragment
-                ? $"#{this.FragmentPosition}; Final: {this.IsFinalFragment}; {this.DestinationEndPoint}"
-                : this.DestinationEndPoint.ToString();
+                ? $"#{this.FragmentPosition}; Final: {this.IsFinalFragment}; {this.RemoteEndPoint}"
+                : this.RemoteEndPoint.ToString();
         }
     }
 }

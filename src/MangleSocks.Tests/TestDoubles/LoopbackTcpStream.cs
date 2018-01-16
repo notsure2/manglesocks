@@ -97,11 +97,11 @@ namespace MangleSocks.Tests.TestDoubles
             return bytes;
         }
 
-        public byte[] WaitForWrittenBytes(int count)
+        public byte[] WaitForWrittenBytes(int count, int timeoutSeconds = 5)
         {
             var batchBlock = new BatchBlock<byte>(count);
             this._writtenBytes.LinkTo(batchBlock, new DataflowLinkOptions { MaxMessages = count });
-            return batchBlock.Receive();
+            return batchBlock.Receive(TimeSpan.FromSeconds(timeoutSeconds));
         }
 
         public ITcpConnector GetConnector()

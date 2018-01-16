@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using MangleSocks.Core.Socks;
 using MangleSocks.Core.Util;
 
 namespace MangleSocks.Core.IO
@@ -27,18 +28,17 @@ namespace MangleSocks.Core.IO
         {
             return this._socket.SendToAsync(
                 new ArraySegment<byte>(buffer, offset, count),
-                SocketFlags.None,
-                destinationEndPoint.ToEndPointWithUnmappedAddress());
+                    SocketFlags.None,
+                    destinationEndPoint.ToEndPointWithUnmappedAddress());
         }
 
         public async Task<SocketReceiveFromResult> ReceiveAsync(
             byte[] buffer,
             int offset,
-            int count,
             EndPoint sourceEndPoint)
         {
             var result = await this._socket.ReceiveFromAsync(
-                new ArraySegment<byte>(buffer, offset, count),
+                new ArraySegment<byte>(buffer, offset, DatagramHeader.MaxUdpSize),
                 SocketFlags.None,
                 sourceEndPoint).ConfigureAwait(false);
             result.RemoteEndPoint = result.RemoteEndPoint.ToEndPointWithUnmappedAddress();

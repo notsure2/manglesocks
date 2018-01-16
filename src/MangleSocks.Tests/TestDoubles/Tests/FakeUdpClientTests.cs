@@ -13,12 +13,12 @@ namespace MangleSocks.Tests.TestDoubles.Tests
         {
             using (var client = new FakeUdpClient())
             {
-                var destination = FakeEndPoints.CreateLocal();
-                client.StageReceivedPacket(destination, 1, 2, 3);
+                var remote = FakeEndPoints.CreateRemote();
+                client.StageReceivedPacket(remote, 1, 2, 3);
                 var buffer = new byte[10];
-                var result = await client.ReceiveAsync(buffer, 0, 3, destination).ConfigureAwait(true);
+                var result = await client.ReceiveAsync(buffer, 0, remote).ConfigureAwait(true);
                 result.ReceivedBytes.Should().Be(3);
-                result.RemoteEndPoint.Should().Be(destination);
+                result.RemoteEndPoint.Should().Be(remote);
                 buffer.Take(3).Should().Equal(1, 2, 3);
             }
         }
@@ -41,7 +41,7 @@ namespace MangleSocks.Tests.TestDoubles.Tests
         public void Dispose_aborts_pending_receive()
         {
             var client = new FakeUdpClient();
-            var readTask = client.ReceiveAsync(new byte[1], 0, 1, FakeEndPoints.CreateLocal());
+            var readTask = client.ReceiveAsync(new byte[1], 0, FakeEndPoints.CreateLocal());
             client.Dispose();
             readTask.Awaiting(t => t).ShouldThrow<Exception>();
         }

@@ -40,9 +40,9 @@ namespace MangleSocks.Core.Socks
             }
         }
 
-        public static Datagram From(EndPoint destinationEndPoint, params byte[] payload)
+        public static Datagram Create(EndPoint remoteEndPoint, params byte[] payload)
         {
-            return new Datagram(new DatagramHeader(destinationEndPoint), new ArraySegment<byte>(payload));
+            return new Datagram(new DatagramHeader(remoteEndPoint), new ArraySegment<byte>(payload));
         }
 
         public static Datagram ReadFrom(byte[] buffer, ArrayPool<byte> bufferPool)

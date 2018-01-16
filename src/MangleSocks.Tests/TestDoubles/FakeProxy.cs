@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using MangleSocks.Core.Server;
@@ -23,9 +24,9 @@ namespace MangleSocks.Tests.TestDoubles
             return Task.CompletedTask;
         }
 
-        public void WaitForRunAsyncCall()
+        public void WaitForRunAsyncCall(int timeoutSeconds = 5)
         {
-            this._runAsyncCalledWaitHandle.Wait();
+            this._runAsyncCalledWaitHandle.Wait(TimeSpan.FromSeconds(timeoutSeconds));
         }
 
         public void Dispose()
