@@ -36,6 +36,9 @@ namespace MangleSocks.Cli
             collection.AddSingleton<ITcpListener>(
                 s => new TcpListener(listenEndPoint, s.GetRequiredService<ILoggerFactory>()));
             collection.AddSingleton<ISocksConnectionFactory, DefaultSocksConnectionFactory>();
+            collection.AddSingleton<IConnector, DefaultConnector>();
+            collection.AddSingleton<ITcpConnector>(s => s.GetRequiredService<IConnector>());
+            collection.AddSingleton<IUdpClientFactory>(s => s.GetRequiredService<IConnector>());
             collection.AddTransient(
                 s =>
                 {

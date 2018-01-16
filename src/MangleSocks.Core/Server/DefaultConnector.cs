@@ -8,7 +8,7 @@ using UdpClient = MangleSocks.Core.IO.UdpClient;
 
 namespace MangleSocks.Core.Server
 {
-    class DefaultConnector : IConnector
+    public class DefaultConnector : IConnector
     {
         readonly ArrayPool<byte> _bufferPool;
 
