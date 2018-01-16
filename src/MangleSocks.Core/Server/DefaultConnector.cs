@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -9,6 +10,13 @@ namespace MangleSocks.Core.Server
 {
     class DefaultConnector : IConnector
     {
+        readonly ArrayPool<byte> _bufferPool;
+
+        public DefaultConnector(ArrayPool<byte> bufferPool)
+        {
+            this._bufferPool = bufferPool ?? throw new ArgumentNullException(nameof(bufferPool));
+        }
+
         public async Task<ITcpStream> ConnectTcpAsync(EndPoint destinationEndPoint)
         {
             if (destinationEndPoint == null) throw new ArgumentNullException(nameof(destinationEndPoint));
@@ -33,14 +41,12 @@ namespace MangleSocks.Core.Server
 
         public IBoundUdpClient CreateBoundUdpClient(EndPoint bindEndPoint)
         {
-            var client = new UdpClient();
-            client.Bind(bindEndPoint);
-            return client;
+            return new UdpClient(bindEndPoint, this._bufferPool);
         }
 
         public IUdpClient CreateUdpClient()
         {
-            return new UdpClient();
+            return new UdpClient(this._bufferPool);
         }
     }
 }
