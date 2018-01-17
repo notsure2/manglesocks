@@ -51,7 +51,7 @@ namespace MangleSocks.Cli
                             DirectoryDescriptor.GetByNameOrNull<IDatagramInterceptor>(x)
                             ?? throw new OptionException("Invalid UDP proxy mode", "u");
                         this.DatagramInterceptorSettings = this.DatagramInterceptorDescriptor
-                            .SettingsDescriptor.CreateInstance();
+                            .SettingsDescriptor?.CreateInstance();
                     }
                 },
                 {

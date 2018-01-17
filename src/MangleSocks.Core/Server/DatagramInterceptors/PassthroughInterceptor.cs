@@ -11,10 +11,6 @@ namespace MangleSocks.Core.Server.DatagramInterceptors
     [DirectoryDescriptor("default")]
     public sealed class PassthroughInterceptor : IDatagramInterceptor
     {
-        public static readonly IDatagramInterceptor Instance = new PassthroughInterceptor();
-
-        PassthroughInterceptor() { }
-
         public void ConfigureWith(object settingsObj)
         {
         }
