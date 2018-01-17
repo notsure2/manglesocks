@@ -115,7 +115,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                 using (var proxy = new UdpProxy(
                     clientStream,
                     new FakeUdpClientFactory(boundUdpClient, relayingUdpClient),
-                    PassthroughInterceptor.Instance,
+                    new PassthroughInterceptor(),
                     bufferPool,
                     timerFactory,
                     new NullLoggerFactory()))
