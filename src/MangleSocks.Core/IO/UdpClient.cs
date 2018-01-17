@@ -40,6 +40,8 @@ namespace MangleSocks.Core.IO
 
         public UdpClient(EndPoint bindEndPoint, ArrayPool<byte> bufferPool) : this(bufferPool)
         {
+            if (bindEndPoint == null) throw new ArgumentNullException(nameof(bindEndPoint));
+
             Socket server;
             switch (bindEndPoint.AddressFamily)
             {
