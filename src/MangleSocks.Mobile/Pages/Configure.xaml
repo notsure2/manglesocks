@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Configure"
+             x:Class="MangleSocks.Mobile.Pages.Configure"
+             x:Name="Self"
+             BindingContext="{Binding Source={x:Reference Self}, Path=ViewModel}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Save" Order="Primary" Clicked="SaveSettingsAndGoBack" />
+    </ContentPage.ToolbarItems>
+
+    <StackLayout>
+        <TableView Intent="Settings" x:Name="Settings">
+            <TableView.Resources>
+                <ResourceDictionary>
+                    <TextCell Text="No configurable settings." IsEnabled="False" x:Key="NoSettingsAvailableCell" />
+                </ResourceDictionary>
+            </TableView.Resources>
+
+            <TableSection Title="General">
+                <EntryCell Label="Local listen port" Text="{Binding AppSettings.ListenPort}" Keyboard="Numeric"
+                           HorizontalTextAlignment="End" />
+                <ViewCell>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Padding="15, 0">
+                        <Label Text="Log level" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Picker x:Name="LogLevelPicker" Title="Log level" ItemsSource="{Binding LogLevels}"
+                                SelectedItem="{Binding AppSettings.LogLevel}" HorizontalOptions="EndAndExpand" />
+                    </StackLayout>
+                </ViewCell>
+                <ViewCell>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Padding="15, 0">
+                        <Label Text="UDP interceptor" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Picker x:Name="UdpInterceptorPicker" Title="UDP interceptor"
+                                ItemsSource="{Binding DatagramInterceptorNames}"
+                                SelectedItem="{Binding AppSettings.DatagramInterceptorName}"
+                                HorizontalOptions="EndAndExpand"
+                                SelectedIndexChanged="HandleUdpInterceptorSelectedIndexChanged" />
+                    </StackLayout>
+                </ViewCell>
+            </TableSection>
+            <TableSection Title="UDP Interceptor" x:Name="UdpInterceptorSection" />
+        </TableView>
+    </StackLayout>
+</ContentPage>

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:valueConverters="clr-namespace:MangleSocks.Mobile.Pages.ValueConverters;assembly=MangleSocks.Mobile"
+             x:Class="MangleSocks.Mobile.Pages.Main"
+             Title="MangleSocks"
+             x:Name="Self"
+             BindingContext="{x:Reference Self}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <valueConverters:ServiceStatusToTriggerButtonTextConverter x:Key="ServiceStatusToTriggerButtonTextConverter" />
+            <valueConverters:ServiceStatusToColorConverter x:Key="ServiceStatusToColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Configure" Order="Primary" Clicked="NavigateToConfigurePage" x:Name="ConfigureButton" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowSpacing="0" ColumnSpacing="0" Margin="0" Padding="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" Margin="10,0,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackLayout Grid.Column="0" Orientation="Horizontal" VerticalOptions="Center">
+                <Label FontSize="Medium" Text="{Binding ListenEndPoint}" />
+                <Label FontSize="Medium">-</Label>
+                <Label FontSize="Medium" Text="{Binding Status}"
+                       TextColor="{Binding Status, Converter={StaticResource ServiceStatusToColorConverter}}" />
+            </StackLayout>
+            <Button VerticalOptions="Fill" Grid.Column="1"
+                    Text="{Binding Status, Converter={StaticResource ServiceStatusToTriggerButtonTextConverter}}"
+                    Clicked="HandleTriggerButtonClicked" />
+        </Grid>
+        <ScrollView Grid.Row="1" VerticalOptions="FillAndExpand" Padding="5">
+            <StackLayout Orientation="Vertical" x:Name="LogMessages">
+                <StackLayout.Resources>
+                    <ResourceDictionary>
+                        <Style TargetType="Label">
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="VerticalOptions" Value="Start" />
+                            <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+                        </Style>
+                    </ResourceDictionary>
+                </StackLayout.Resources>
+            </StackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
