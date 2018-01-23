@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using MangleSocks.Core.IO;
 using MangleSocks.Core.Server;
+using MangleSocks.Core.Settings;
 using MangleSocks.Core.Util;
 using MangleSocks.Core.Util.Directory;
 using Microsoft.Extensions.Logging;
@@ -13,18 +14,18 @@ using Mono.Options;
 
 namespace MangleSocks.Cli
 {
-    class Arguments
+    class AppSettings : IAppSettings
     {
         readonly OptionSet _optionSet;
         readonly IDictionary<string, string> _datagramInterceptorSettingsByName;
 
         public IPEndPoint ListenEndPoint { get; private set; }
         public ImplDescriptor DatagramInterceptorDescriptor { get; private set; }
-        public object DatagramInterceptorSettings { get; set; }
+        public object DatagramInterceptorSettings { get; private set; }
         public LogLevel LogLevel { get; private set; }
-        public bool ShowHelp { get; private set; }
+        public bool ShowHelp { get; set; }
 
-        public Arguments()
+        public AppSettings()
         {
             this.ListenEndPoint = new IPEndPoint(IPAddress.Loopback, TcpListener.DefaultPort);
             this.DatagramInterceptorDescriptor = ImplDescriptor.GetDefault<IDatagramInterceptor>();

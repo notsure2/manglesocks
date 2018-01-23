@@ -23,27 +23,27 @@ namespace MangleSocks.Cli
                     s_Version);
                 Console.WriteLine();
 
-                var args = new Arguments();
-                args.PopulateFrom(cliArgs);
+                var settings = new AppSettings();
+                settings.PopulateFrom(cliArgs);
 
-                if (args.ShowHelp)
+                if (settings.ShowHelp)
                 {
-                    args.WriteUsageOptions(Console.Out);
+                    settings.WriteUsageOptions(Console.Out);
                     return -2;
                 }
 
                 var serviceProvider = ServiceConfiguration.CreateServiceProvider(
-                    args.ListenEndPoint,
-                    args.DatagramInterceptorDescriptor,
-                    args.DatagramInterceptorSettings,
-                    args.LogLevel);
+                    settings.ListenEndPoint,
+                    settings.DatagramInterceptorDescriptor,
+                    settings.DatagramInterceptorSettings,
+                    settings.LogLevel);
 
                 var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger(typeof(Program).Name);
 
                 logger.LogInformation("Starting version " + s_Version);
                 logger.LogInformation("** Press CTRL+C to shutdown.");
-                args.LogProperties(logger);
+                settings.LogProperties(logger);
 
                 using (var server = serviceProvider.GetRequiredService<SocksServer>())
                 {
