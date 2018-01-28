@@ -37,6 +37,11 @@ namespace MangleSocks.Core.Util
                 }
             }
 
+            if (IPAddress.TryParse(addressExpression, out var ipAddress))
+            {
+                return new IPEndPoint(ipAddress, port);
+            }
+
             var address = Dns.GetHostEntry(addressExpression).AddressList.FirstOrDefault()
                           ?? throw new ArgumentException($"Failed to resolve IP address for '{addressExpression}'");
             return new IPEndPoint(address, port);
