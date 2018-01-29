@@ -7,6 +7,8 @@ namespace MangleSocks.Core.Util.Directory
 {
     public class DirectoryDescriptor
     {
+        public const string Default = "default";
+
         public Type Type { get; }
         public string Identifier { get; }
         public IReadOnlyList<string> Aliases { get; }
@@ -31,6 +33,12 @@ namespace MangleSocks.Core.Util.Directory
             }
 
             return (T)ActivatorUtilities.CreateInstance(serviceProvider, this.Type);
+        }
+
+        public static DirectoryDescriptor GetDefault<T>()
+        {
+            return TypeDirectory<T>.GetDescriptorByNameOrNull(Default)
+                   ?? throw new InvalidOperationException($"No default impl has been defined for {typeof(T).Name}");
         }
 
         public static DirectoryDescriptor GetByNameOrNull<T>(string name)

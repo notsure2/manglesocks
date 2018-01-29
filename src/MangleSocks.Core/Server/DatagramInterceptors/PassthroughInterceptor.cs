@@ -8,7 +8,7 @@ using MangleSocks.Core.Util.Threading.Tasks;
 
 namespace MangleSocks.Core.Server.DatagramInterceptors
 {
-    [DirectoryDescriptor("default")]
+    [DirectoryDescriptor(DirectoryDescriptor.Default)]
     public sealed class PassthroughInterceptor : IDatagramInterceptor
     {
         public void ConfigureWith(object settingsObj)

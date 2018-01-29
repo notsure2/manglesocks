@@ -27,7 +27,7 @@ namespace MangleSocks.Cli
         public Arguments()
         {
             this.ListenEndPoint = new IPEndPoint(IPAddress.Loopback, TcpListener.DefaultPort);
-            this.DatagramInterceptorDescriptor = DirectoryDescriptor.GetByNameOrNull<IDatagramInterceptor>("default");
+            this.DatagramInterceptorDescriptor = DirectoryDescriptor.GetDefault<IDatagramInterceptor>();
             this.DatagramInterceptorSettings = new Dictionary<string, string>();
             this.LogLevel = LogLevel.Information;
             this._datagramInterceptorSettingsByName = new Dictionary<string, string>();
