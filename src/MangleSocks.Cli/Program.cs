@@ -32,12 +32,7 @@ namespace MangleSocks.Cli
                     return -2;
                 }
 
-                var serviceProvider = ServiceConfiguration.CreateServiceProvider(
-                    settings.ListenEndPoint,
-                    settings.DatagramInterceptorDescriptor,
-                    settings.DatagramInterceptorSettings,
-                    settings.LogLevel);
-
+                var serviceProvider = ServiceConfiguration.CreateServiceProvider(settings);
                 var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger(typeof(Program).Name);
 

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Buffers;
-using System.Net;
-using MangleSocks.Core.IO;
-using MangleSocks.Core.Server;
-using MangleSocks.Core.Util.Directory;
-using Microsoft.Extensions.DependencyInjection;
+using MangleSocks.Core.Bootstrap;
+using MangleSocks.Core.Settings;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
@@ -14,42 +10,11 @@ namespace MangleSocks.Cli
 {
     static class ServiceConfiguration
     {
-        public static IServiceProvider CreateServiceProvider(
-            IPEndPoint listenEndPoint,
-            ImplDescriptor datagramInterceptorDescriptor,
-            object datagramInterceptorSettings,
-            LogLevel logLevel)
+        public static IServiceProvider CreateServiceProvider(IAppSettings settings)
         {
-            if (listenEndPoint == null)
-            {
-                throw new ArgumentNullException(nameof(listenEndPoint));
-            }
-
-            if (datagramInterceptorDescriptor == null)
-            {
-                throw new ArgumentNullException(nameof(datagramInterceptorDescriptor));
-            }
-
-            var collection = new ServiceCollection();
-            collection.AddSingleton(ArrayPool<byte>.Shared);
-            collection.AddSingleton(CreateLoggerFactory(logLevel));
-            collection.AddSingleton<ITcpListener>(
-                s => new TcpListener(listenEndPoint, s.GetRequiredService<ILoggerFactory>()));
-            collection.AddSingleton<ISocksConnectionFactory, DefaultSocksConnectionFactory>();
-            collection.AddSingleton<IConnector, DefaultConnector>();
-            collection.AddSingleton<ITcpConnector>(s => s.GetRequiredService<IConnector>());
-            collection.AddSingleton<IUdpClientFactory>(s => s.GetRequiredService<IConnector>());
-            collection.AddTransient(
-                s =>
-                {
-                    var interceptor = datagramInterceptorDescriptor.CreateInstance<IDatagramInterceptor>(s);
-                    interceptor.ConfigureWith(datagramInterceptorSettings);
-                    return interceptor;
-                });
-            collection.AddTransient<IProxyFactory, DefaultProxyFactory>();
-            collection.AddSingleton<SocksServer>();
-
-            return collection.BuildServiceProvider();
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            var loggerFactory = CreateLoggerFactory(settings.LogLevel);
+            return DefaultServiceConfiguration.CreateServiceProvider(settings, loggerFactory);
         }
 
         static ILoggerFactory CreateLoggerFactory(LogLevel logLevel)
@@ -57,8 +22,10 @@ namespace MangleSocks.Cli
             var configuration = new LoggerConfiguration()
                 .MinimumLevel.Is(ConvertLevel(logLevel))
                 .Enrich.FromLogContext()
-                .WriteTo.Console(
-                    outputTemplate: "[{Timestamp:u} {Level:u3}] [{SourceContext}]{Scope} {Message}{NewLine}{Exception}");
+                .WriteTo
+                .Console(
+                    outputTemplate:
+                    "[{Timestamp:u} {Level:u3}] [{SourceContext}]{Scope} {Message}{NewLine}{Exception}");
 
             var logger = configuration.CreateLogger();
             var loggerFactory = new LoggerFactory(new[] { new SerilogLoggerProvider(logger, true) });
