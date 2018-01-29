@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MangleSocks.Core.Util.Directory
 {
-    public class DirectoryDescriptor
+    public class ImplDescriptor
     {
         public const string Default = "default";
 
@@ -14,7 +14,7 @@ namespace MangleSocks.Core.Util.Directory
         public IReadOnlyList<string> Aliases { get; }
         public SettingsDescriptor SettingsDescriptor { get; }
 
-        public DirectoryDescriptor(Type type, IReadOnlyList<string> aliases, SettingsDescriptor settingsDescriptor)
+        public ImplDescriptor(Type type, IReadOnlyList<string> aliases, SettingsDescriptor settingsDescriptor)
         {
             this.Type = type ?? throw new ArgumentNullException(nameof(type));
             this.Aliases = (aliases ?? new string[0]).Union(new[] { type.Name }).ToList();
@@ -35,20 +35,20 @@ namespace MangleSocks.Core.Util.Directory
             return (T)ActivatorUtilities.CreateInstance(serviceProvider, this.Type);
         }
 
-        public static DirectoryDescriptor GetDefault<T>()
+        public static ImplDescriptor GetDefault<T>()
         {
-            return TypeDirectory<T>.GetDescriptorByNameOrNull(Default)
+            return ImplDirectory<T>.GetDescriptorByNameOrNull(Default)
                    ?? throw new InvalidOperationException($"No default impl has been defined for {typeof(T).Name}");
         }
 
-        public static DirectoryDescriptor GetByNameOrNull<T>(string name)
+        public static ImplDescriptor GetByNameOrNull<T>(string name)
         {
-            return TypeDirectory<T>.GetDescriptorByNameOrNull(name);
+            return ImplDirectory<T>.GetDescriptorByNameOrNull(name);
         }
 
-        public static IEnumerable<DirectoryDescriptor> GetAll<T>()
+        public static IEnumerable<ImplDescriptor> GetAll<T>()
         {
-            return TypeDirectory<T>.Descriptors;
+            return ImplDirectory<T>.Descriptors;
         }
     }
 }

@@ -4,16 +4,16 @@ using System.Collections.Generic;
 namespace MangleSocks.Core.Util.Directory
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    class DirectoryDescriptorAttribute : Attribute
+    class ImplDescriptorAttribute : Attribute
     {
         readonly Type _settingsType;
         readonly IReadOnlyList<string> _aliases;
 
         public SettingsDescriptor SettingsDescriptor { get; }
 
-        public DirectoryDescriptorAttribute(params string[] aliases) : this(null, aliases) { }
+        public ImplDescriptorAttribute(params string[] aliases) : this(null, aliases) { }
 
-        public DirectoryDescriptorAttribute(Type settingsType, params string[] aliases)
+        public ImplDescriptorAttribute(Type settingsType, params string[] aliases)
         {
             this._settingsType = settingsType;
             this._aliases = aliases;
@@ -24,9 +24,9 @@ namespace MangleSocks.Core.Util.Directory
             }
         }
 
-        public DirectoryDescriptor CreateDescriptor(Type decoratedType)
+        public ImplDescriptor CreateDescriptor(Type decoratedType)
         {
-            return new DirectoryDescriptor(decoratedType, this._aliases, this.SettingsDescriptor);
+            return new ImplDescriptor(decoratedType, this._aliases, this.SettingsDescriptor);
         }
     }
 }

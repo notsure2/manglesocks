@@ -16,7 +16,7 @@ namespace MangleSocks.Cli
     {
         public static IServiceProvider CreateServiceProvider(
             IPEndPoint listenEndPoint,
-            DirectoryDescriptor datagramInterceptorDescriptor,
+            ImplDescriptor datagramInterceptorDescriptor,
             object datagramInterceptorSettings,
             LogLevel logLevel)
         {

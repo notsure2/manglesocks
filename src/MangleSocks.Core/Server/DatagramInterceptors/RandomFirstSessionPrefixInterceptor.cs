@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MangleSocks.Core.Server.DatagramInterceptors
 {
-    [DirectoryDescriptor(typeof(Settings), "random-first-session-prefix")]
+    [ImplDescriptor(typeof(Settings), "random-first-session-prefix")]
     sealed class RandomFirstSessionPrefixInterceptor : IDatagramInterceptor
     {
         readonly ArrayPool<byte> _bufferPool;

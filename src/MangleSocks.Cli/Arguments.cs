@@ -19,7 +19,7 @@ namespace MangleSocks.Cli
         readonly IDictionary<string, string> _datagramInterceptorSettingsByName;
 
         public IPEndPoint ListenEndPoint { get; private set; }
-        public DirectoryDescriptor DatagramInterceptorDescriptor { get; private set; }
+        public ImplDescriptor DatagramInterceptorDescriptor { get; private set; }
         public object DatagramInterceptorSettings { get; set; }
         public LogLevel LogLevel { get; private set; }
         public bool ShowHelp { get; private set; }
@@ -27,7 +27,7 @@ namespace MangleSocks.Cli
         public Arguments()
         {
             this.ListenEndPoint = new IPEndPoint(IPAddress.Loopback, TcpListener.DefaultPort);
-            this.DatagramInterceptorDescriptor = DirectoryDescriptor.GetDefault<IDatagramInterceptor>();
+            this.DatagramInterceptorDescriptor = ImplDescriptor.GetDefault<IDatagramInterceptor>();
             this.DatagramInterceptorSettings = new Dictionary<string, string>();
             this.LogLevel = LogLevel.Information;
             this._datagramInterceptorSettingsByName = new Dictionary<string, string>();
@@ -42,13 +42,13 @@ namespace MangleSocks.Cli
                     "u|udp=",
                     "UDP proxy mode.\r\nOne of: " + string.Join(
                                                       ", ",
-                                                      DirectoryDescriptor.GetAll<IDatagramInterceptor>()
+                                                      ImplDescriptor.GetAll<IDatagramInterceptor>()
                                                           .Select(x => x.Identifier))
                                                   + "\r\n(use with -h for list of applicable options)",
                     x =>
                     {
                         this.DatagramInterceptorDescriptor =
-                            DirectoryDescriptor.GetByNameOrNull<IDatagramInterceptor>(x)
+                            ImplDescriptor.GetByNameOrNull<IDatagramInterceptor>(x)
                             ?? throw new OptionException("Invalid UDP proxy mode", "u");
                         this.DatagramInterceptorSettings = this.DatagramInterceptorDescriptor
                             .SettingsDescriptor?.CreateInstance();
