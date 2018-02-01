@@ -33,25 +33,29 @@ namespace MangleSocks.Cli
                 }
 
                 var serviceProvider = ServiceConfiguration.CreateServiceProvider(settings);
-                var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-                var logger = loggerFactory.CreateLogger(typeof(Program).Name);
 
-                logger.LogInformation("Starting version " + s_Version);
-                logger.LogInformation("** Press CTRL+C to shutdown.");
-                settings.LogProperties(logger);
-
-                using (var server = serviceProvider.GetRequiredService<SocksServer>())
+                using (var scope = serviceProvider.CreateScope())
                 {
-                    server.Start();
+                    var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger(typeof(Program).Name);
 
-                    var waitHandle = new ManualResetEventSlim(false);
-                    Console.TreatControlCAsInput = false;
-                    Console.CancelKeyPress += delegate
+                    logger.LogInformation("Starting version " + s_Version);
+                    logger.LogInformation("** Press CTRL+C to shutdown.");
+                    settings.LogProperties(logger);
+
+                    using (var server = scope.ServiceProvider.GetRequiredService<SocksServer>())
                     {
-                        Console.WriteLine("- CTRL+C pressed. Shutting down...");
-                        waitHandle.Set();
-                    };
-                    waitHandle.Wait();
+                        server.Start();
+
+                        var waitHandle = new ManualResetEventSlim(false);
+                        Console.TreatControlCAsInput = false;
+                        Console.CancelKeyPress += delegate
+                        {
+                            Console.WriteLine("- CTRL+C pressed. Shutting down...");
+                            waitHandle.Set();
+                        };
+                        waitHandle.Wait();
+                    }
                 }
 
                 return 0;

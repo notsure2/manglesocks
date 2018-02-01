@@ -75,10 +75,25 @@ namespace MangleSocks.Core.Server
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                 }
-                catch (OperationCanceledException)
+                catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
                 {
-                    connection?.Dispose();
-                    stream?.Dispose();
+                    try
+                    {
+                        connection?.Dispose();
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+
+                    try
+                    {
+                        stream?.Dispose();
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -103,14 +118,14 @@ namespace MangleSocks.Core.Server
 
                 try
                 {
-                    this._serverLoop.GetAwaiter().GetResult();
+                    this._serverLoop?.GetAwaiter().GetResult();
                 }
                 catch (Exception)
                 {
                     // ignored
                 }
 
-                this._serverLoop.Dispose();
+                this._serverLoop?.Dispose();
                 this._cancellationTokenSource.Dispose();
 
                 foreach (var connection in this._connections)

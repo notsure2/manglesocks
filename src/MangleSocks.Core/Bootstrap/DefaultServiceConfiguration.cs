@@ -21,7 +21,7 @@ namespace MangleSocks.Core.Bootstrap
             var collection = new ServiceCollection();
             collection.AddSingleton(ArrayPool<byte>.Shared);
             collection.AddSingleton(loggerFactory);
-            collection.AddSingleton<ITcpListener>(
+            collection.AddScoped<ITcpListener>(
                 s => new TcpListener(settings.ListenEndPoint, s.GetRequiredService<ILoggerFactory>()));
             collection.AddSingleton<ISocksConnectionFactory, DefaultSocksConnectionFactory>();
             collection.AddSingleton<IConnector, DefaultConnector>();
@@ -35,7 +35,7 @@ namespace MangleSocks.Core.Bootstrap
                     return interceptor;
                 });
             collection.AddTransient<IProxyFactory, DefaultProxyFactory>();
-            collection.AddSingleton<SocksServer>();
+            collection.AddScoped<SocksServer>();
 
             configureAction?.Invoke(collection);
             return collection.BuildServiceProvider();
