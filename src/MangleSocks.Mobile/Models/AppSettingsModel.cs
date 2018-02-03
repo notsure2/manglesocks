@@ -12,14 +12,14 @@ namespace MangleSocks.Mobile.Models
 {
     public class AppSettingsModel
     {
-        public ushort ListenPort { get; set; }
+        public ushort ListenPort { get; set; } = 1081;
 
-        public string DatagramInterceptorName { get; set; }
+        public string DatagramInterceptorName { get; set; } = ImplDescriptor.Default;
 
         [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public object DatagramInterceptorSettings { get; set; }
 
-        public LogLevel LogLevel { get; set; }
+        public LogLevel LogLevel { get; set; } = LogLevel.Information;
 
         public static AppSettingsModel LoadFrom(ISettings settings)
         {
