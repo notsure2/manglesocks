@@ -13,12 +13,7 @@ namespace MangleSocks.Mobile.Droid
 
             return MobileServiceConfiguration.CreateServiceProvider(
                 settings,
-                loggerConfiguration =>
-                {
-                    loggerConfiguration
-                        .WriteTo.AndroidLog(
-                            outputTemplate: "[{Level:u3} [{SourceContext}]{Scope} {Message}{NewLine}{Exception}");
-                });
+                config => config.WriteTo.AndroidLog(outputTemplate: "{Scope} {Message}{NewLine}{Exception}"));
         }
     }
 }
