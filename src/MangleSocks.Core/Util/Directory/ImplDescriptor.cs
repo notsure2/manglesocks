@@ -43,7 +43,7 @@ namespace MangleSocks.Core.Util.Directory
 
         public static ImplDescriptor GetByNameOrNull<T>(string name)
         {
-            return ImplDirectory<T>.GetDescriptorByNameOrNull(name);
+            return name == null ? null : ImplDirectory<T>.GetDescriptorByNameOrNull(name);
         }
 
         public static IEnumerable<ImplDescriptor> GetAll<T>()
