@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using MangleSocks.Mobile.Messaging;
 using Plugin.Settings.Abstractions;
-using Serilog.Events;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,8 +11,10 @@ namespace MangleSocks.Mobile.Pages
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Main
     {
-        readonly IMessagingCenter _messagingCenter;
-        readonly ISettings _settings;
+        public static readonly BindableProperty LogMessagesProperty = BindableProperty.Create(
+            nameof(LogMessages),
+            typeof(ObservableCollection<ServiceLogMessage>),
+            typeof(Main));
 
         public static readonly BindableProperty StatusProperty = BindableProperty.Create(
             nameof(Status),
@@ -25,6 +28,16 @@ namespace MangleSocks.Mobile.Pages
             typeof(Main),
             "(unknown)");
 
+        readonly IMessagingCenter _messagingCenter;
+        readonly ISettings _settings;
+        bool _autoscrollLogMessages;
+
+        public ObservableCollection<ServiceLogMessage> LogMessages
+        {
+            get => (ObservableCollection<ServiceLogMessage>)this.GetValue(LogMessagesProperty);
+            set => this.SetValue(LogMessagesProperty, value);
+        }
+
         public ServiceStatus Status
         {
             get => (ServiceStatus)this.GetValue(StatusProperty);
@@ -37,14 +50,55 @@ namespace MangleSocks.Mobile.Pages
             set => this.SetValue(ListenEndPointProperty, value);
         }
 
-		public Main(IMessagingCenter messagingCenter, ISettings settings)
-		{
-		    this._messagingCenter = messagingCenter ?? throw new ArgumentNullException(nameof(messagingCenter));
-		    this._settings = settings ?? throw new ArgumentNullException(nameof(settings));
-		    this.InitializeComponent();
-		}
+        public Main(IMessagingCenter messagingCenter, ISettings settings)
+        {
+            this._messagingCenter = messagingCenter ?? throw new ArgumentNullException(nameof(messagingCenter));
+            this._settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
-	    void NavigateToConfigurePage(object sender, EventArgs e)
+            this.InitializeComponent();
+        }
+
+        protected override void OnAppearing()
+        {
+            this.ListenEndPoint = AppSettings.Get(this._settings).ListenEndPoint.ToString();
+
+            this._messagingCenter.Subscribe<Application, ServiceStatusUpdate>(
+                this,
+                nameof(ServiceStatusUpdate),
+                (_, update) => Device.BeginInvokeOnMainThread(
+                    () =>
+                    {
+                        this.Status = update.Status;
+                        this.ConfigureButton.IsEnabled = update.Status == ServiceStatus.Stopped;
+
+                        if (this.LogMessages != update.LogMessages)
+                        {
+                            if (this.LogMessages != null)
+                            {
+                                this.LogMessages.CollectionChanged -= this.HandleLogMessagesCollectionChanged;
+                            }
+
+                            this.LogMessages = update.LogMessages;
+                            this._autoscrollLogMessages = true;
+                            this.LogMessages.CollectionChanged += this.HandleLogMessagesCollectionChanged;
+                        }
+                    }));
+
+            this._messagingCenter.Send(
+                Application.Current,
+                nameof(ServiceStatusUpdateRequest),
+                new ServiceStatusUpdateRequest());
+
+            base.OnAppearing();
+        }
+
+        protected override void OnDisappearing()
+        {
+            this._messagingCenter.Unsubscribe<Application, ServiceStatusUpdate>(this, nameof(ServiceStatusUpdate));
+            base.OnDisappearing();
+        }
+
+        void NavigateToConfigurePage(object sender, EventArgs e)
 	    {
 	        this.Navigation.PushAsync(new Configure(this._settings), true);
 	    }
@@ -55,7 +109,6 @@ namespace MangleSocks.Mobile.Pages
 
             if (isStartRequest)
             {
-                this.LogMessages.Children.Clear();
                 this.ConfigureButton.IsEnabled = false;
             }
 
@@ -65,70 +118,48 @@ namespace MangleSocks.Mobile.Pages
                 new ServiceActionRequest { IsStartRequest = isStartRequest });
         }
 
-        protected override void OnAppearing()
+        void HandleListViewItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
-            this.ListenEndPoint = AppSettings.Get(this._settings).ListenEndPoint.ToString();
-
-            this._messagingCenter.Subscribe<Application, ServiceStatusUpdate>(
-                this,
-                nameof(ServiceStatusUpdate),
-                (_, update) => Device.BeginInvokeOnMainThread(() =>
-                {
-                    this.Status = update.Status;
-                    this.ConfigureButton.IsEnabled = update.Status == ServiceStatus.Stopped;
-                }));
-
-            this._messagingCenter.Subscribe<Application, ServiceLogMessage>(
-                this,
-                nameof(ServiceLogMessage),
-                (_, log) => Device.BeginInvokeOnMainThread(
-                    () => this.LogMessages.Children.Add(
-                        new Label
-                        {
-                            Text = log.Message,
-                            TextColor = LogLevelToColor(log.Severity)
-                        })));
-
-            this._messagingCenter.Send(
-                Application.Current,
-                nameof(ServiceStatusUpdateRequest),
-                new ServiceStatusUpdateRequest());
-
-            base.OnAppearing();
+            ((ListView)sender).SelectedItem = null;
         }
 
-        static Color LogLevelToColor(LogEventLevel level)
+        void HandleLogMessagesCollectionChanged(
+            object sender,
+            NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
         {
-            switch (level)
+            if (!this._autoscrollLogMessages
+                || notifyCollectionChangedEventArgs.Action != NotifyCollectionChangedAction.Add)
             {
-                case LogEventLevel.Verbose:
-                    return Color.DarkGray;
+                return;
+            }
 
-                case LogEventLevel.Debug:
-                    return Color.Gray;
+            var collection = (ObservableCollection<ServiceLogMessage>)sender;
+            if (collection.Count == 0)
+            {
+                return;
+            }
 
-                case LogEventLevel.Information:
-                    return Color.Black;
+            Device.BeginInvokeOnMainThread(
+                () => this.LogMessageListView.ScrollTo(
+                    notifyCollectionChangedEventArgs.NewItems[0],
+                    ScrollToPosition.End,
+                    true));
+        }
 
-                case LogEventLevel.Warning:
-                    return Color.OrangeRed;
-
-                case LogEventLevel.Error:
-                    return Color.Red;
-
-                case LogEventLevel.Fatal:
-                    return Color.DarkRed;
-
-                default:
-                    return Color.Black;
+        void HandleLogMessagesListViewItemAppearing(object sender, ItemVisibilityEventArgs e)
+        {
+            if (this.LogMessages != null && e.Item == this.LogMessages[this.LogMessages.Count - 1])
+            {
+                this._autoscrollLogMessages = true;
             }
         }
 
-        protected override void OnDisappearing()
+        void HandleLogMessagesListViewItemDisappearing(object sender, ItemVisibilityEventArgs e)
         {
-            this._messagingCenter.Unsubscribe<Application, ServiceStatusUpdate>(this, nameof(ServiceStatusUpdate));
-            this._messagingCenter.Unsubscribe<Application, ServiceLogMessage>(this, nameof(ServiceLogMessage));
-            base.OnDisappearing();
+            if (this.LogMessages != null && e.Item == this.LogMessages[this.LogMessages.Count - 1])
+            {
+                this._autoscrollLogMessages = false;
+            }
         }
     }
 }

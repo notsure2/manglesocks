@@ -54,10 +54,7 @@ namespace MangleSocks.Mobile.Droid
                     void OnServiceConnected(object sender, INativeService service)
                     {
                         var localConnection = (NativeServiceConnection)sender;
-                        MessagingCenter.Instance.Send(
-                            FormsApplication.Current,
-                            nameof(ServiceStatusUpdate),
-                            new ServiceStatusUpdate { Status = service.Status });
+                        service.NotifyStatusUpdate();
                         localConnection.ServiceConnected -= OnServiceConnected;
                         this.UnbindService(localConnection);
                     }

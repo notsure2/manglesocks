@@ -9,7 +9,8 @@
              BindingContext="{x:Reference Self}">
     <ContentPage.Resources>
         <ResourceDictionary>
-            <valueConverters:ServiceStatusToTriggerButtonTextConverter x:Key="ServiceStatusToTriggerButtonTextConverter" />
+            <valueConverters:ServiceStatusToTriggerButtonTextConverter
+                x:Key="ServiceStatusToTriggerButtonTextConverter" />
             <valueConverters:ServiceStatusToColorConverter x:Key="ServiceStatusToColorConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
@@ -24,34 +25,42 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" Margin="10,0,5,0">
+        <Grid Grid.Row="0" VerticalOptions="Fill" HorizontalOptions="FillAndExpand" RowSpacing="0" Margin="10,0,5,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackLayout Grid.Column="0" Orientation="Horizontal" VerticalOptions="Center">
+            <StackLayout Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalOptions="Center">
                 <Label FontSize="Medium" Text="{Binding ListenEndPoint}" />
                 <Label FontSize="Medium">-</Label>
                 <Label FontSize="Medium" Text="{Binding Status}"
                        TextColor="{Binding Status, Converter={StaticResource ServiceStatusToColorConverter}}" />
             </StackLayout>
-            <Button VerticalOptions="Fill" Grid.Column="1"
+            <Button Grid.Row="0" Grid.Column="1" VerticalOptions="Fill"
                     Text="{Binding Status, Converter={StaticResource ServiceStatusToTriggerButtonTextConverter}}"
                     Clicked="HandleTriggerButtonClicked" />
         </Grid>
-        <ScrollView Grid.Row="1" VerticalOptions="FillAndExpand" Padding="5">
-            <StackLayout Orientation="Vertical" x:Name="LogMessages">
-                <StackLayout.Resources>
-                    <ResourceDictionary>
-                        <Style TargetType="Label">
-                            <Setter Property="Margin" Value="0" />
-                            <Setter Property="VerticalOptions" Value="Start" />
-                            <Setter Property="HorizontalOptions" Value="FillAndExpand" />
-                        </Style>
-                    </ResourceDictionary>
-                </StackLayout.Resources>
-            </StackLayout>
-        </ScrollView>
+
+        <ListView x:Name="LogMessageListView" Grid.Row="1" VerticalOptions="FillAndExpand"
+                  CachingStrategy="RecycleElementAndDataTemplate"
+                  HasUnevenRows="True" ItemsSource="{Binding LogMessages}" ItemSelected="HandleListViewItemSelected"
+                  ItemAppearing="HandleLogMessagesListViewItemAppearing"
+                  ItemDisappearing="HandleLogMessagesListViewItemDisappearing">
+            <ListView.Resources>
+                <ResourceDictionary>
+                    <valueConverters:LogEventLevelToColorConverter x:Key="LogEventLevelToColorConverter" />
+                </ResourceDictionary>
+            </ListView.Resources>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Label TextColor="{Binding Severity, Converter={StaticResource LogEventLevelToColorConverter}}"
+                               FontSize="Small" Text="{Binding Message}" Margin="3" />
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </ContentPage>

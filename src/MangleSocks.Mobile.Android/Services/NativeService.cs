@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System.Collections.ObjectModel;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Util;
@@ -17,7 +18,10 @@ namespace MangleSocks.Mobile.Droid.Services
     [Service]
     public class NativeService : Service, INativeService
     {
+        const int c_MaxLogMessages = 5000;
+
         readonly IAppSettings _settings;
+        readonly ObservableCollection<ServiceLogMessage> _logMessages;
         readonly object _startLocker = new object();
 
         Binder _binder;
@@ -38,6 +42,7 @@ namespace MangleSocks.Mobile.Droid.Services
         public NativeService()
         {
             this._settings = AppSettings.Get(App.Settings);
+            this._logMessages = new ObservableCollection<ServiceLogMessage>();
         }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
@@ -49,6 +54,19 @@ namespace MangleSocks.Mobile.Droid.Services
                     ILogger log = null;
                     try
                     {
+                        MessagingCenter.Instance.Subscribe<FormsApplication, ServiceLogMessage>(
+                            this,
+                            nameof(ServiceLogMessage),
+                            (_, logMessage) =>
+                            {
+                                if (this._logMessages.Count > c_MaxLogMessages)
+                                {
+                                    this._logMessages.Clear();
+                                }
+
+                                this._logMessages.Add(logMessage);
+                            });
+
                         var serviceProvider = ServiceConfiguration.CreateServiceProvider(this._settings);
                         this._serviceScope = serviceProvider.CreateScope();
                         log = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(this.GetType().Name);
@@ -70,11 +88,7 @@ namespace MangleSocks.Mobile.Droid.Services
                         this.StartForeground(1, notification);
 
                         this._started = true;
-
-                        MessagingCenter.Instance.Send(
-                            FormsApplication.Current,
-                            nameof(ServiceStatusUpdate),
-                            new ServiceStatusUpdate { Status = ServiceStatus.Started });
+                        this.NotifyStatusUpdate();
                     }
                     catch (Exception ex)
                     {
@@ -103,11 +117,9 @@ namespace MangleSocks.Mobile.Droid.Services
         public override void OnDestroy()
         {
             this.StopSocksServer();
+            this.NotifyStatusUpdate();
 
-            MessagingCenter.Instance.Send(
-                FormsApplication.Current,
-                nameof(ServiceStatusUpdate),
-                new ServiceStatusUpdate { Status = ServiceStatus.Stopped });
+            MessagingCenter.Instance.Unsubscribe<FormsApplication, ServiceLogMessage>(this, nameof(ServiceLogMessage));
 
             base.OnDestroy();
         }
@@ -115,8 +127,21 @@ namespace MangleSocks.Mobile.Droid.Services
         void StopSocksServer()
         {
             this._serviceScope?.Dispose();
+            this._logMessages.Clear();
             this._serviceScope = null;
             this._started = false;
+        }
+
+        public void NotifyStatusUpdate()
+        {
+            MessagingCenter.Instance.Send(
+                FormsApplication.Current,
+                nameof(ServiceStatusUpdate),
+                new ServiceStatusUpdate
+                {
+                    Status = this.Status,
+                    LogMessages = this._logMessages
+                });
         }
 
         protected override void Dispose(bool disposing)
