@@ -75,7 +75,8 @@ namespace MangleSocks.Mobile.Droid.Services
                         socksServer.Start();
 
                         var notification = new Notification.Builder(this)
-                            .SetContentTitle(nameof(MangleSocks) + " - " + this._settings.ListenEndPoint)
+                            .SetSubText(this._settings.ListenEndPoint.ToString())
+                            .SetVisibility(NotificationVisibility.Secret)
                             .SetSmallIcon(Resource.Drawable.ic_stat_socks)
                             .SetContentIntent(
                                 PendingIntent.GetActivity(
