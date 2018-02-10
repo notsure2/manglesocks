@@ -21,6 +21,7 @@ namespace MangleSocks.Cli
                 Console.WriteLine(
                     "** MangleSocks - A TCP/UDP SOCKS5 proxy with stream transformation. Version {0}",
                     s_Version);
+                Console.WriteLine("** https://github.com/notsure2/manglesocks");
                 Console.WriteLine();
 
                 var settings = new AppSettings();
