@@ -22,6 +22,11 @@
                 <TapGestureRecognizer Tapped="HandleProjectLinkTapped" />
             </Label.GestureRecognizers>
         </Label>
+        <Label x:Name="LicenseLink" Text="{x:Static mobile:App.LicenseUrl}" TextColor="Blue" FontAttributes="Bold">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="HandleLicenseLinkTapped" />
+            </Label.GestureRecognizers>
+        </Label>
         <Label Text="Hint: When tunneling a VPN or another tunneling app, make sure to exclude this one from tunneling by the other app to prevent network failure due to a routing feedback loop." />
     </StackLayout>
 </ContentPage>

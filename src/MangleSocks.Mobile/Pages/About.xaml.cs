@@ -16,5 +16,10 @@ namespace MangleSocks.Mobile.Pages
 	    {
             Device.OpenUri(new Uri(this.ProjectLink.Text));
 	    }
-	}
+
+	    void HandleLicenseLinkTapped(object sender, EventArgs e)
+	    {
+	        Device.OpenUri(new Uri(this.LicenseLink.Text));
+	    }
+    }
 }

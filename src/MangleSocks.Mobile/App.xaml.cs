@@ -12,6 +12,7 @@ namespace MangleSocks.Mobile
     public partial class App
     {
         public const string ProjectUrl = "https://github.com/notsure2/manglesocks";
+        public const string LicenseUrl = "https://opensource.org/licenses/MIT";
         public static readonly string Version = typeof(App).Assembly
                                                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                                                     .InformationalVersion ?? "<unknown>";
