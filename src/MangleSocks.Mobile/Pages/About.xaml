@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mobile="clr-namespace:MangleSocks.Mobile;assembly=MangleSocks.Mobile"
+             x:Class="MangleSocks.Mobile.Pages.About"
+             Title="About MangleSocks">
+    <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand" Padding="5">
+        <StackLayout.Resources>
+            <ResourceDictionary>
+                <Style TargetType="{x:Type Label}">
+                    <Setter Property="HorizontalOptions" Value="Center" />
+                </Style>
+            </ResourceDictionary>
+        </StackLayout.Resources>
+
+        <Label Text="MangleSocks" FontSize="Large" />
+        <Label Text="{x:Static mobile:App.Version}" />
+        <Label Text="A TCP/UDP SOCKS5 proxy with stream transformation" />
+        <Label x:Name="ProjectLink" Text="{x:Static mobile:App.ProjectUrl}" TextColor="Blue" FontAttributes="Bold">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="HandleProjectLinkTapped" />
+            </Label.GestureRecognizers>
+        </Label>
+        <Label Text="Hint: When tunneling a VPN or another tunneling app, make sure to exclude this one from tunneling by the other app to prevent network failure due to a routing feedback loop." />
+    </StackLayout>
+</ContentPage>

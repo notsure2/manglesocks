@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using MangleSocks.Mobile.Pages;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
@@ -10,6 +11,11 @@ namespace MangleSocks.Mobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class App
     {
+        public const string ProjectUrl = "https://github.com/notsure2/manglesocks";
+        public static readonly string Version = typeof(App).Assembly
+                                                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                                                    .InformationalVersion ?? "<unknown>";
+
         public static readonly ISettings Settings = CrossSettings.IsSupported
             ? CrossSettings.Current
             : throw new NotSupportedException("Settings are not supported on this platform");

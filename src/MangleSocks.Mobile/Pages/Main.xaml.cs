@@ -103,6 +103,11 @@ namespace MangleSocks.Mobile.Pages
 	        this.Navigation.PushAsync(new Configure(this._settings), true);
 	    }
 
+        void NavigateToAboutPage(object sender, EventArgs e)
+        {
+            this.Navigation.PushAsync(new About(), true);
+        }
+
         void HandleTriggerButtonClicked(object sender, EventArgs e)
         {
             bool isStartRequest = this.Status != ServiceStatus.Started;

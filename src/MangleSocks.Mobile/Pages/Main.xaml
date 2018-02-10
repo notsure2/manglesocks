@@ -17,6 +17,7 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Configure" Order="Primary" Clicked="NavigateToConfigurePage" x:Name="ConfigureButton" />
+        <ToolbarItem Text="About" Order="Secondary" Clicked="NavigateToAboutPage" />
     </ContentPage.ToolbarItems>
 
     <Grid RowSpacing="0" ColumnSpacing="0" Margin="0" Padding="0">
