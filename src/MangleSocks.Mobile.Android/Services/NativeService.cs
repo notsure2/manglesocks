@@ -128,7 +128,6 @@ namespace MangleSocks.Mobile.Droid.Services
         void StopSocksServer()
         {
             this._serviceScope?.Dispose();
-            this._logMessages.Clear();
             this._serviceScope = null;
             this._started = false;
         }
