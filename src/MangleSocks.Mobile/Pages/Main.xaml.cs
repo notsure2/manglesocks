@@ -31,6 +31,7 @@ namespace MangleSocks.Mobile.Pages
         readonly IMessagingCenter _messagingCenter;
         readonly ISettings _settings;
         bool _autoscrollLogMessages;
+        ServiceLogMessage _lastLogMessage;
 
         public ObservableCollection<ServiceLogMessage> LogMessages
         {
@@ -144,16 +145,17 @@ namespace MangleSocks.Mobile.Pages
                 return;
             }
 
-            Device.BeginInvokeOnMainThread(
-                () => this.LogMessageListView.ScrollTo(
-                    notifyCollectionChangedEventArgs.NewItems[0],
-                    ScrollToPosition.End,
-                    true));
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                var newItem = (ServiceLogMessage)notifyCollectionChangedEventArgs.NewItems[0];
+                this._lastLogMessage = newItem;
+                this.LogMessageListView.ScrollTo(newItem, ScrollToPosition.End, true);
+            });
         }
 
         void HandleLogMessagesListViewItemAppearing(object sender, ItemVisibilityEventArgs e)
         {
-            if (this.LogMessages != null && e.Item == this.LogMessages[this.LogMessages.Count - 1])
+            if (this._lastLogMessage != null && e.Item == this._lastLogMessage)
             {
                 this._autoscrollLogMessages = true;
             }
@@ -161,7 +163,7 @@ namespace MangleSocks.Mobile.Pages
 
         void HandleLogMessagesListViewItemDisappearing(object sender, ItemVisibilityEventArgs e)
         {
-            if (this.LogMessages != null && e.Item == this.LogMessages[this.LogMessages.Count - 1])
+            if (this._lastLogMessage != null && e.Item == this._lastLogMessage)
             {
                 this._autoscrollLogMessages = false;
             }

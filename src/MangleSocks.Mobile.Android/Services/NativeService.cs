@@ -18,7 +18,7 @@ namespace MangleSocks.Mobile.Droid.Services
     [Service]
     public class NativeService : Service, INativeService
     {
-        const int c_MaxLogMessages = 5000;
+        const int c_MaxLogMessages = 150;
 
         readonly IAppSettings _settings;
         readonly ObservableCollection<ServiceLogMessage> _logMessages;
@@ -57,15 +57,16 @@ namespace MangleSocks.Mobile.Droid.Services
                         MessagingCenter.Instance.Subscribe<FormsApplication, ServiceLogMessage>(
                             this,
                             nameof(ServiceLogMessage),
-                            (_, logMessage) =>
-                            {
-                                if (this._logMessages.Count > c_MaxLogMessages)
+                            (_, logMessage) => Device.BeginInvokeOnMainThread(
+                                () =>
                                 {
-                                    this._logMessages.Clear();
-                                }
+                                    if (this._logMessages.Count > c_MaxLogMessages)
+                                    {
+                                        this._logMessages.RemoveAt(0);
+                                    }
 
-                                this._logMessages.Add(logMessage);
-                            });
+                                    this._logMessages.Add(logMessage);
+                                }));
 
                         var serviceProvider = ServiceConfiguration.CreateServiceProvider(this._settings);
                         this._serviceScope = serviceProvider.CreateScope();
@@ -101,6 +102,7 @@ namespace MangleSocks.Mobile.Droid.Services
                         {
                             Log.Error(nameof(MangleSocks), Throwable.FromException(ex), "Failed to start service");
                         }
+
                         this.StopSelfResult(1);
                     }
                 }
