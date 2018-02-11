@@ -15,7 +15,7 @@ using FormsApplication = Xamarin.Forms.Application;
 
 namespace MangleSocks.Mobile.Droid.Services
 {
-    [Service]
+    [Service(Name = "org.manglesocks.service")]
     public class NativeService : Service, INativeService
     {
         const int c_MaxLogMessages = 150;
