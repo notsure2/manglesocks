@@ -1,0 +1,20 @@
+<Project>
+  <Target Name="AddVersionToAndroidManifest" BeforeTargets="_GeneratePackageManagerJava">
+    <PropertyGroup>
+      <VersionInfoPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), "Properties", "VersionInfo.cs"))</VersionInfoPath>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+      <Input Condition="Exists($(VersionInfoPath))">$([System.IO.File]::ReadAllText($(VersionInfoPath)))</Input>
+      <Pattern>\[assembly: AssemblyInformationalVersion[^"]+"([^"]+)"</Pattern>
+      <AndroidVersionName>$([System.Text.RegularExpressions.Regex]::Match($(Input), $(Pattern)).Groups[1].Value)</AndroidVersionName>
+      <Pattern>\[assembly: AssemblyVersion[^"]+"([^"]+)"</Pattern>
+      <ExtractedAssemblyVersion>$([System.Text.RegularExpressions.Regex]::Match($(Input), $(Pattern)).Groups[1].Value)</ExtractedAssemblyVersion>
+      <AndroidVersionCode>$(ExtractedAssemblyVersion.Substring($([MSBuild]::Add($(ExtractedAssemblyVersion.LastIndexOf('.')), 1))))</AndroidVersionCode>
+      <GeneratedManifestPath>$(IntermediateOutputPath)android\AndroidManifest.xml</GeneratedManifestPath>
+    </PropertyGroup>
+    
+    <XmlPoke Condition="$(AndroidVersionCode) != ''" XmlInputPath="$(GeneratedManifestPath)" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="manifest/@android:versionCode" Value="$(AndroidVersionCode)" />
+    <XmlPoke Condition="$(AndroidVersionName) != ''" XmlInputPath="$(GeneratedManifestPath)" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="manifest/@android:versionName" Value="$(AndroidVersionName)" />
+  </Target>
+</Project>
