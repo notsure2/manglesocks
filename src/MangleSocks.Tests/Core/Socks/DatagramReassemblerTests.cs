@@ -25,7 +25,7 @@ namespace MangleSocks.Tests.Core.Socks
         {
             this._reassembler
                 .Invoking(r => r.GetCompletedSetOrAdd(default(ArraySegment<byte>), 0, false))
-                .ShouldThrow<ArgumentNullException>();
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace MangleSocks.Tests.Core.Socks
         {
             this._reassembler
                 .Invoking(r => r.GetCompletedSetOrAdd(new byte[1], -1, true))
-                .ShouldThrow<ArgumentOutOfRangeException>();
+                .Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -61,12 +61,12 @@ namespace MangleSocks.Tests.Core.Socks
 
                 this._reassembler
                     .Invoking(r => r.GetCompletedSetOrAdd(new byte[] { 10, 11, 12 }, 0, false))
-                    .ShouldThrow<InvalidOperationException>()
+                    .Should().Throw<InvalidOperationException>()
                     .And.Message.Should().ContainEquivalentOf("last set").And.ContainEquivalentOf("dispose");
 
                 this._reassembler
                     .Invoking(r => r.GetCompletedSetOrAdd(new byte[] { 7, 8, 9 }, 1, false))
-                    .ShouldThrow<InvalidOperationException>()
+                    .Should().Throw<InvalidOperationException>()
                     .And.Message.Should().ContainEquivalentOf("last set").And.ContainEquivalentOf("dispose");
             }
             finally
@@ -152,7 +152,8 @@ namespace MangleSocks.Tests.Core.Socks
             this._reassembler.Dispose();
             this._reassembler
                 .Invoking(x => x.GetCompletedSetOrAdd(new byte[] { 1, 2, 3 }, 1, false))
-                .ShouldThrow<ObjectDisposedException>();
+                .Should()
+                .Throw<ObjectDisposedException>();
         }
 
         public void Dispose()

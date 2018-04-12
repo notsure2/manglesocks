@@ -28,7 +28,8 @@ namespace MangleSocks.Tests.Core.IO
             {
                 udpClient
                     .Awaiting(x => x.ReceiveAsync(new byte[DatagramHeader.MaxUdpSize], 0, FakeEndPoints.CreateRemote()))
-                    .ShouldThrow<InvalidOperationException>();
+                    .Should()
+                    .Throw<InvalidOperationException>();
             }
         }
 
@@ -75,7 +76,8 @@ namespace MangleSocks.Tests.Core.IO
             {
                 udpClient
                     .Awaiting(x => x.ReceiveAsync(buffer, 0, mismatchingReceiveEndPoint))
-                    .ShouldThrow<InvalidOperationException>();
+                    .Should()
+                    .Throw<InvalidOperationException>();
             }
         }
 
@@ -93,7 +95,7 @@ namespace MangleSocks.Tests.Core.IO
                 ipv4ServerSocket.SendTo(new byte[] { 10, 9, 8, 7 }, sendToIpv4);
                 var receiveBufferIpv4 = new byte[DatagramHeader.MaxUdpSize];
                 var receiveTaskIpv4 = udpClient.ReceiveAsync(receiveBufferIpv4, 0, new IPEndPoint(IPAddress.Any, 0));
-                receiveTaskIpv4.ExecutionTimeOf(x => x.Wait()).ShouldNotExceed(TimeSpan.FromSeconds(5));
+                receiveTaskIpv4.ExecutionTimeOf(x => x.Wait()).Should().BeLessOrEqualTo(TimeSpan.FromSeconds(5));
                 receiveBufferIpv4.Take(4).Should().Equal(10, 9, 8, 7);
 
                 var ipv6ServerSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
@@ -105,7 +107,7 @@ namespace MangleSocks.Tests.Core.IO
                 ipv6ServerSocket.SendTo(new byte[] { 100, 90, 80, 70 }, sendToIpv6);
                 var receiveBufferIpv6 = new byte[DatagramHeader.MaxUdpSize];
                 var receiveTaskIpv6 = udpClient.ReceiveAsync(receiveBufferIpv6, 0, new IPEndPoint(IPAddress.Any, 0));
-                receiveTaskIpv6.ExecutionTimeOf(x => x.Wait()).ShouldNotExceed(TimeSpan.FromSeconds(5));
+                receiveTaskIpv6.ExecutionTimeOf(x => x.Wait()).Should().BeLessOrEqualTo(TimeSpan.FromSeconds(5));
                 receiveBufferIpv6.Take(4).Should().Equal(100, 90, 80, 70);
             }
         }

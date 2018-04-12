@@ -27,7 +27,8 @@ namespace MangleSocks.Tests.Core.Socks
 
             commandReply
                 .Awaiting(x => x.WriteToAsync(stream, this._bufferPool))
-                .ShouldThrow<InvalidDataException>()
+                .Should()
+                .Throw<InvalidDataException>()
                 .And.Message.Should().ContainEquivalentOf(nameof(EndPoint));
         }
 

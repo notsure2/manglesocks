@@ -57,7 +57,8 @@ namespace MangleSocks.Tests.Core.Socks
             var bytes = s_ValidIpv4BindRequest.ToArray();
             bytes[0] = 4;
             Func<Task> act = () => Command.ReadFromAsync(new BufferReadOnlyStream(bytes), this._bufferPool);
-            act.ShouldThrow<InvalidDataException>()
+            act.Should()
+                .Throw<InvalidDataException>()
                 .And.Message.Should()
                 .ContainEquivalentOf("version");
         }
@@ -68,7 +69,7 @@ namespace MangleSocks.Tests.Core.Socks
             var bytes = s_ValidIpv4BindRequest.ToArray();
             bytes[1] = 255;
             Func<Task> act = () => Command.ReadFromAsync(new BufferReadOnlyStream(bytes), this._bufferPool);
-            var ex = act.ShouldThrow<ProtocolException>().Which;
+            var ex = act.Should().Throw<ProtocolException>().Which;
             ex.ErrorCode.Should().Be(CommandReplyType.CommandNotSupported);
             ex.Message.Should().ContainEquivalentOf("command type");
         }
@@ -79,7 +80,7 @@ namespace MangleSocks.Tests.Core.Socks
             var bytes = s_ValidIpv4BindRequest.ToArray();
             bytes[2] = 255;
             Func<Task> act = () => Command.ReadFromAsync(new BufferReadOnlyStream(bytes), this._bufferPool);
-            act.ShouldThrow<InvalidDataException>()
+            act.Should().Throw<InvalidDataException>()
                 .And.Message.Should()
                 .ContainEquivalentOf("invalid command");
         }
@@ -90,7 +91,7 @@ namespace MangleSocks.Tests.Core.Socks
             var bytes = s_ValidIpv4BindRequest.ToArray();
             bytes[3] = 255;
             Func<Task> act = () => Command.ReadFromAsync(new BufferReadOnlyStream(bytes), this._bufferPool);
-            var ex = act.ShouldThrow<ProtocolException>().Which;
+            var ex = act.Should().Throw<ProtocolException>().Which;
             ex.ErrorCode.Should().Be(CommandReplyType.AddressTypeNotSupported);
             ex.Message.Should().ContainEquivalentOf("address type");
         }

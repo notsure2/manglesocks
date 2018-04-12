@@ -43,7 +43,7 @@ namespace MangleSocks.Tests.TestDoubles.Tests
             var client = new FakeUdpClient();
             var readTask = client.ReceiveAsync(new byte[1], 0, FakeEndPoints.CreateLocal());
             client.Dispose();
-            readTask.Awaiting(t => t).ShouldThrow<Exception>();
+            readTask.Awaiting(t => t).Should().Throw<Exception>();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace MangleSocks.Tests.Core.Socks
         {
             var stream = new BufferReadOnlyStream(4, 1, 0);
             Func<Task> act = () => Greeting.ReadFromAsync(stream, this._bufferPool);
-            act.ShouldThrow<InvalidDataException>().And.Message.Should().ContainEquivalentOf("version");
+            act.Should().Throw<InvalidDataException>().And.Message.Should().ContainEquivalentOf("version");
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace MangleSocks.Tests.Core.Socks
         {
             var stream = new BufferReadOnlyStream(5, 0, 0);
             Func<Task> act = () => Greeting.ReadFromAsync(stream, this._bufferPool);
-            act.ShouldThrow<InvalidDataException>().And.Message.Should().ContainEquivalentOf("authentication methods");
+            act.Should().Throw<InvalidDataException>().And.Message.Should().ContainEquivalentOf("authentication methods");
         }
 
         [Fact]

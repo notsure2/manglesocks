@@ -123,7 +123,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                     var task = proxy.RunAsync(CancellationToken.None);
                     clientStream.Dispose();
 
-                    task.Awaiting(x => x).ShouldThrow<Exception>();
+                    task.Awaiting(x => x).Should().Throw<Exception>();
                 }
             }
         }
@@ -150,7 +150,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                     var task = proxy.RunAsync(CancellationToken.None);
                     proxy.Dispose();
 
-                    task.Awaiting(x => x).ShouldThrow<Exception>();
+                    task.Awaiting(x => x).Should().Throw<Exception>();
                 }
 
                 A.CallTo(() => interceptor.Dispose()).MustHaveHappened(Repeated.Exactly.Once);

@@ -61,7 +61,7 @@ namespace MangleSocks.Tests.Core.Socks.DatagramTests
                 bufferLengthToCompare--;
                 datagram
                     .Invoking(d => d.WriteTo(new ArraySegment<byte>(buffer, emptySpacePrefix, bufferLengthToCompare)))
-                    .ShouldThrow<ArgumentException>().And.Message.Should().ContainEquivalentOf("insufficient");
+                    .Should().Throw<ArgumentException>().And.Message.Should().ContainEquivalentOf("insufficient");
                 return;
             }
 

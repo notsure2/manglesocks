@@ -21,7 +21,7 @@ namespace MangleSocks.Tests.Core.Socks.DatagramTests
         {
             var stream = new byte[] { 0, 0, 0, (byte)AddressType.Ipv4, 1, 2, 3, 4, 255 };
             Action act = () => Datagram.ReadFrom(stream, this._bufferPool);
-            act.ShouldThrow<InvalidDataException>().And.Message.Should().ContainEquivalentOf("truncated");
+            act.Should().Throw<InvalidDataException>().And.Message.Should().ContainEquivalentOf("truncated");
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace MangleSocks.Tests.Core.Socks.DatagramTests
         {
             var stream = new byte[] { 0, 1, 0, (byte)AddressType.Ipv4, 1, 2, 3, 4, 255, 254 };
             Action act = () => Datagram.ReadFrom(stream, this._bufferPool);
-            act.ShouldThrow<InvalidDataException>().And.Message.Should().ContainEquivalentOf("corrupt");
+            act.Should().Throw<InvalidDataException>().And.Message.Should().ContainEquivalentOf("corrupt");
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace MangleSocks.Tests.Core.Socks.DatagramTests
         {
             var stream = new byte[] { 0, 0, 128, (byte)AddressType.Ipv4, 1, 2, 3, 4, 255, 254 };
             Action act = () => Datagram.ReadFrom(stream, this._bufferPool);
-            act.ShouldThrow<InvalidDataException>().And.Message.Should().ContainEquivalentOf("fragment");
+            act.Should().Throw<InvalidDataException>().And.Message.Should().ContainEquivalentOf("fragment");
         }
 
         [Fact]

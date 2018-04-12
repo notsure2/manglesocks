@@ -50,7 +50,7 @@ namespace MangleSocks.Tests.TestDoubles.Tests
             var stream = new LoopbackTcpStream();
             var readTask = stream.ReadAsync(new byte[1], 0, 1);
             stream.Dispose();
-            readTask.Awaiting(t => t).ShouldThrow<Exception>();
+            readTask.Awaiting(t => t).Should().Throw<Exception>();
         }
     }
 }
