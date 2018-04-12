@@ -5,7 +5,7 @@
       <AssembliesRefWorkaroundUnix Include="@(ResolvedAssemblies->Replace('/ref/netstandard2.0/','/lib/netstandard2.0/'))" />
       <AssembliesRefWorkaround Include="@(AssembliesRefWorkaroundWindows)" Condition="@(AssembliesRefWorkaroundWindows) != @(ResolvedAssemblies)" />
       <AssembliesRefWorkaround Include="@(AssembliesRefWorkaroundUnix)" Condition="@(AssembliesRefWorkaroundUnix) != @(ResolvedAssemblies)" />
-      <ResolvedAssemblies Remove="@(ResolvedAssemblies)" />
+      <ResolvedAssemblies Condition="'@(AssembliesRefWorkaround->Count())' &gt; 0" Remove="@(ResolvedAssemblies)" />
       <ResolvedAssemblies Include="@(AssembliesRefWorkaround)" />
       <AssembliesRefWorkaround Remove="@(AssembliesRefWorkaround)" />
       <AssembliesRefWorkaroundWindows Remove="@(AssembliesRefWorkaroundWindows)" />
