@@ -14,7 +14,7 @@
       <GeneratedManifestPath>$(IntermediateOutputPath)android\AndroidManifest.xml</GeneratedManifestPath>
     </PropertyGroup>
     
-    <XmlPoke Condition="$(AndroidVersionCode) != ''" XmlInputPath="$(GeneratedManifestPath)" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="manifest/@android:versionCode" Value="$(AndroidVersionCode)" />
+    <XmlPoke Condition="'$(AndroidVersionCode)' != '' AND '$(AndroidVersionCode)' != '0' AND '$(AndroidVersionCode)' != '-1'" XmlInputPath="$(GeneratedManifestPath)" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="manifest/@android:versionCode" Value="$(AndroidVersionCode)" />
     <XmlPoke Condition="$(AndroidVersionName) != ''" XmlInputPath="$(GeneratedManifestPath)" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="manifest/@android:versionName" Value="$(AndroidVersionName)" />
   </Target>
 </Project>
