@@ -53,7 +53,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                                     x => boundClientExpectedSentSecondDatagram.Header == x.Header
                                          && boundClientExpectedSentSecondDatagram.Payload.SequenceEqual(x.Payload)),
                                 this._context.BoundUdpClient))
-                        .MustHaveHappened(Repeated.Exactly.Once);
+                        .MustHaveHappenedOnceExactly();
 
                     var relayClientSentPackets = this._context.RelayingUdpClient.WaitForSentPackets(2)
                         .Select(x => x.Packet).ToList();
@@ -66,7 +66,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                                     x => new byte[] { 1, 2, 3, 4 }.SequenceEqual(x)),
                                 remote,
                                 this._context.RelayingUdpClient))
-                        .MustHaveHappened(Repeated.Exactly.Once);
+                        .MustHaveHappenedOnceExactly();
                 });
         }
 
@@ -99,7 +99,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                                     x => new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }.SequenceEqual(x)),
                                 remote,
                                 this._context.RelayingUdpClient))
-                        .MustHaveHappened(Repeated.Exactly.Once);
+                        .MustHaveHappenedOnceExactly();
                 });
         }
 
@@ -153,7 +153,7 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                     task.Awaiting(x => x).Should().Throw<Exception>();
                 }
 
-                A.CallTo(() => interceptor.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => interceptor.Dispose()).MustHaveHappenedOnceExactly();
             }
         }
 
@@ -181,13 +181,13 @@ namespace MangleSocks.Tests.Core.Server.UdpProxyTests
                             () => this._context.Interceptor.TryInterceptIncomingAsync(
                                 A<Datagram>.That.Matches(x => new byte[] { 1, 2, 3, 4 }.SequenceEqual(x.Payload)),
                                 this._context.BoundUdpClient))
-                        .MustHaveHappened(Repeated.Exactly.Once);
+                        .MustHaveHappenedOnceExactly();
 
                     A.CallTo(
                             () => this._context.Interceptor.TryInterceptIncomingAsync(
                                 A<Datagram>._,
                                 this._context.BoundUdpClient))
-                        .MustHaveHappened(Repeated.Exactly.Once);
+                        .MustHaveHappenedOnceExactly();
                 });
         }
 
