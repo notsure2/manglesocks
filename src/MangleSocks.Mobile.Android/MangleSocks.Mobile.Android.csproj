@@ -136,6 +136,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\build\Version.xml" />
-  <Import Project="..\..\build\WorkaroundXamarinAndroidBug1162.xml" />
   <Import Project="..\..\build\VersionXamarinAndroid.xml" />
 </Project>
