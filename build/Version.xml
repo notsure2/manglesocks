@@ -15,7 +15,7 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
   
-  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+  <Target Name="GenerateVersionInfo" BeforeTargets="CoreCompile">
     <Exec Command="dotnet &quot;$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), dotnet-project-version.dll))&quot; -s=git -t=cs -v=$(VersionPrefix) -m=$(VersionSuffix)" />
   </Target>
   
