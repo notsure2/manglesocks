@@ -219,8 +219,7 @@ namespace MangleSocks.Core.IO
                     nameof(endPoint));
             }
 
-            var socket = clientSocket;
-            return socket;
+            return clientSocket;
         }
 
         public void Dispose()
