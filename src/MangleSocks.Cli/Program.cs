@@ -19,7 +19,7 @@ namespace MangleSocks.Cli
             try
             {
                 Console.WriteLine(
-                    "** MangleSocks - A TCP/UDP SOCKS5 proxy with stream transformation. Version {0}",
+                    "** MangleSocks - A TCP/UDP proxy with stream transformation. Version {0}",
                     s_Version);
                 Console.WriteLine("** https://github.com/notsure2/manglesocks");
                 Console.WriteLine("** License: https://opensource.org/licenses/MIT");
