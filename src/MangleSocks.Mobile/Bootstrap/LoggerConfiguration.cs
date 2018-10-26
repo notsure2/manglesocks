@@ -1,31 +1,29 @@
 ﻿using System;
-using MangleSocks.Core.Bootstrap;
-using MangleSocks.Core.Settings;
+using MangleSocks.Mobile.Serilog;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Xamarin.Forms;
 
-namespace MangleSocks.Cli
+namespace MangleSocks.Mobile.Bootstrap
 {
-    static class ServiceConfiguration
+    static class LoggerConfiguration
     {
-        public static IServiceProvider CreateServiceProvider(IAppSettings settings)
+        public static ILoggerFactory CreateLoggerFactory(
+            LogLevel logLevel,
+            Action<global::Serilog.LoggerConfiguration> configureAction)
         {
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-            var loggerFactory = CreateLoggerFactory(settings.LogLevel);
-            return DefaultServiceConfiguration.CreateServiceProvider(settings, loggerFactory);
-        }
-
-        static ILoggerFactory CreateLoggerFactory(LogLevel logLevel)
-        {
-            var configuration = new LoggerConfiguration()
+            var configuration = new global::Serilog.LoggerConfiguration()
                 .MinimumLevel.Is(ConvertLevel(logLevel))
                 .Enrich.FromLogContext()
-                .WriteTo
-                .Console(
-                    outputTemplate:
-                    "[{Timestamp:u} {Level:u3}] [{SourceContext}]{Scope} {Message}{NewLine}{Exception}");
+                .Enrich.WithProperty(Constants.SourceContextPropertyName, "MangleSocks")
+                .WriteTo.Sink(
+                    new MessageSink(
+                        "[{SourceContext}]{Scope} {Message}{NewLine}{Exception}",
+                        MessagingCenter.Instance));
+
+            configureAction?.Invoke(configuration);
 
             var logger = configuration.CreateLogger();
             var loggerFactory = new LoggerFactory(new[] { new SerilogLoggerProvider(logger, true) });

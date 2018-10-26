@@ -1,9 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
-using MangleSocks.Core.Server;
-using MangleSocks.Core.Settings;
-using MangleSocks.Core.Util.Directory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Plugin.Settings.Abstractions;
@@ -14,7 +10,7 @@ namespace MangleSocks.Mobile.Models
     {
         public ushort ListenPort { get; set; } = 1081;
 
-        public string DatagramInterceptorName { get; set; } = ImplDescriptor.Default;
+        public ClientMode Mode { get; set; } = ClientMode.Simple;
 
         [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public object DatagramInterceptorSettings { get; set; }
@@ -41,19 +37,6 @@ namespace MangleSocks.Mobile.Models
 
             var json = JsonConvert.SerializeObject(this);
             settings.AddOrUpdateValue(nameof(MangleSocks), json);
-        }
-
-        public IAppSettings ToAppSettings()
-        {
-            return new AppSettings
-            {
-                ListenEndPoint = new IPEndPoint(IPAddress.Loopback, this.ListenPort),
-                DatagramInterceptorDescriptor =
-                    ImplDescriptor.GetByNameOrNull<IDatagramInterceptor>(this.DatagramInterceptorName)
-                    ?? ImplDescriptor.GetDefault<IDatagramInterceptor>(),
-                DatagramInterceptorSettings = this.DatagramInterceptorSettings,
-                LogLevel = this.LogLevel
-            };
         }
     }
 }

@@ -1,62 +1,49 @@
 ﻿using System;
+using System.Net;
 using MangleSocks.Core.Bootstrap;
-using MangleSocks.Core.Settings;
-using MangleSocks.Mobile.Serilog;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using Serilog.Extensions.Logging;
-using Xamarin.Forms;
+using MangleSocks.Core.Server;
+using MangleSocks.Core.Server.DatagramInterceptors;
+using MangleSocks.Mobile.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MangleSocks.Mobile.Bootstrap
 {
     public static class MobileServiceConfiguration
     {
         public static IServiceProvider CreateServiceProvider(
-            IAppSettings settings,
-            Action<LoggerConfiguration> loggerConfigurationAction)
+            AppSettingsModel settings,
+            Action<global::Serilog.LoggerConfiguration> loggerConfigureAction)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
-            var loggerFactory = CreateLoggerFactory(settings.LogLevel, loggerConfigurationAction);
-            return DefaultServiceConfiguration.CreateServiceProvider(settings, loggerFactory);
-        }
 
-        static ILoggerFactory CreateLoggerFactory(LogLevel logLevel, Action<LoggerConfiguration> configureAction)
-        {
-            var configuration = new LoggerConfiguration()
-                .MinimumLevel.Is(ConvertLevel(logLevel))
-                .Enrich.FromLogContext()
-                .Enrich.WithProperty(Constants.SourceContextPropertyName, "MangleSocks")
-                .WriteTo.Sink(
-                    new MessageSink(
-                        "[{SourceContext}]{Scope} {Message}{NewLine}{Exception}",
-                        MessagingCenter.Instance));
+            var loggerFactory = LoggerConfiguration.CreateLoggerFactory(settings.LogLevel, loggerConfigureAction);
+            return ClientServiceConfiguration.CreateServiceProvider(
+                new IPEndPoint(IPAddress.Loopback, settings.ListenPort),
+                loggerFactory,
+                serviceCollection =>
+                {
+                    switch (settings.Mode)
+                    {
+                        case ClientMode.Simple:
+                            serviceCollection.AddTransient<IDatagramInterceptor, PassthroughInterceptor>();
+                            return;
 
-            configureAction?.Invoke(configuration);
+                        case ClientMode.UdpRandomFirstSessionPrefix:
+                            if (!(settings.DatagramInterceptorSettings is RandomFirstSessionPrefixInterceptor.Settings
+                                interceptorSettings))
+                            {
+                                interceptorSettings = new RandomFirstSessionPrefixInterceptor.Settings();
+                                settings.DatagramInterceptorSettings = interceptorSettings;
+                            }
 
-            var logger = configuration.CreateLogger();
-            var loggerFactory = new LoggerFactory(new[] { new SerilogLoggerProvider(logger, true) });
-            return loggerFactory;
-        }
+                            serviceCollection.AddSingleton(interceptorSettings);
+                            serviceCollection.AddTransient<IDatagramInterceptor, RandomFirstSessionPrefixInterceptor>();
+                            return;
 
-        static LogEventLevel ConvertLevel(LogLevel logLevel)
-        {
-            switch (logLevel)
-            {
-                case LogLevel.Debug:
-                    return LogEventLevel.Debug;
-                case LogLevel.Information:
-                    return LogEventLevel.Information;
-                case LogLevel.Warning:
-                    return LogEventLevel.Warning;
-                case LogLevel.Error:
-                    return LogEventLevel.Error;
-                case LogLevel.Critical:
-                    return LogEventLevel.Fatal;
-                default:
-                    return LogEventLevel.Verbose;
-            }
+                        default:
+                            throw new NotSupportedException("Unsupported mode: " + settings.Mode);
+                    }
+                });
         }
     }
 }

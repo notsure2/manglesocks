@@ -14,6 +14,7 @@
         <TableView Intent="Settings" x:Name="Settings">
             <TableView.Resources>
                 <ResourceDictionary>
+                    <!-- ReSharper disable once Xaml.RedundantResource -->
                     <TextCell Text="No configurable settings." IsEnabled="False" x:Key="NoSettingsAvailableCell" />
                 </ResourceDictionary>
             </TableView.Resources>
@@ -30,12 +31,12 @@
                 </ViewCell>
                 <ViewCell>
                     <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Padding="15, 0">
-                        <Label Text="UDP interceptor" HorizontalOptions="Start" VerticalOptions="Center" />
-                        <Picker x:Name="UdpInterceptorPicker" Title="UDP interceptor"
-                                ItemsSource="{Binding DatagramInterceptorNames}"
-                                SelectedItem="{Binding AppSettings.DatagramInterceptorName}"
+                        <Label Text="Mode" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Picker x:Name="ModePicker" Title="Mode"
+                                ItemsSource="{Binding ClientModes}"
+                                SelectedItem="{Binding AppSettings.Mode}"
                                 HorizontalOptions="EndAndExpand"
-                                SelectedIndexChanged="HandleUdpInterceptorSelectedIndexChanged" />
+                                SelectedIndexChanged="HandleModePickerSelectedIndexChanged" />
                     </StackLayout>
                 </ViewCell>
             </TableSection>

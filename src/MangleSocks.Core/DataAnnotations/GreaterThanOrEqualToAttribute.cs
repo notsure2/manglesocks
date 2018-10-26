@@ -24,11 +24,20 @@ namespace MangleSocks.Core.DataAnnotations
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            if (validationContext == null) throw new ArgumentNullException(nameof(validationContext));
+
             var firstComparable = value as IComparable;
-            var secondComparable = validationContext
+
+            var secondProperty = validationContext
                 .ObjectType
-                .GetProperty(this._otherPropertyName)
-                .GetValue(validationContext.ObjectInstance) as IComparable;
+                .GetProperty(this._otherPropertyName);
+
+            if (secondProperty == null)
+            {
+                throw new InvalidOperationException($"Property '{this._otherPropertyName}' could not be found.");
+            }
+
+            var secondComparable = secondProperty.GetValue(validationContext.ObjectInstance) as IComparable;
 
             if (firstComparable != null && secondComparable != null && firstComparable.CompareTo(secondComparable) < 0)
             {

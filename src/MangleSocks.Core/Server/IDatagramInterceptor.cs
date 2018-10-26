@@ -7,9 +7,7 @@ using MangleSocks.Core.Socks;
 namespace MangleSocks.Core.Server
 {
     public interface IDatagramInterceptor : IDisposable
-    {
-        void ConfigureWith(object settingsObj);
-
+    { 
         Task<bool> TryInterceptOutgoingAsync(
             ArraySegment<byte> payload,
             EndPoint destinationEndPoint,

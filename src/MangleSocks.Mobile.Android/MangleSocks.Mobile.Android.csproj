@@ -76,7 +76,6 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceConfiguration.cs" />
     <Compile Include="Services\INativeService.cs" />
     <Compile Include="Services\NativeService.cs" />
     <Compile Include="Services\NativeServiceBinder.cs" />

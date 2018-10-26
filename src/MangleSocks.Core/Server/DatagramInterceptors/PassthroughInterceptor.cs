@@ -3,18 +3,12 @@ using System.Net;
 using System.Threading.Tasks;
 using MangleSocks.Core.IO;
 using MangleSocks.Core.Socks;
-using MangleSocks.Core.Util.Directory;
 using MangleSocks.Core.Util.Threading.Tasks;
 
 namespace MangleSocks.Core.Server.DatagramInterceptors
 {
-    [ImplDescriptor(ImplDescriptor.Default)]
     public sealed class PassthroughInterceptor : IDatagramInterceptor
     {
-        public void ConfigureWith(object settingsObj)
-        {
-        }
-
         public Task<bool> TryInterceptOutgoingAsync(ArraySegment<byte> payload, EndPoint destinationEndPoint, IUdpClient relayClient)
         {
             return CachedTasks.FalseTask;

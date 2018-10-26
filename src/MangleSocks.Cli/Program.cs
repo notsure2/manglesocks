@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading;
-using MangleSocks.Core.Server;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Mono.Options;
+using MangleSocks.Cli.CommandLine.Conventions;
+using MangleSocks.Cli.Commands;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace MangleSocks.Cli
 {
     static class Program
     {
-        static readonly string s_Version = typeof(Program).Assembly
-                                               .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                                               .InformationalVersion ?? "<unknown>";
+        public static readonly string Version = typeof(Program).Assembly
+                                                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                                                    .InformationalVersion ?? "<unknown>";
 
         static int Main(string[] cliArgs)
         {
@@ -20,52 +18,19 @@ namespace MangleSocks.Cli
             {
                 Console.WriteLine(
                     "** MangleSocks - A TCP/UDP proxy with stream transformation. Version {0}",
-                    s_Version);
+                    Version);
                 Console.WriteLine("** https://github.com/notsure2/manglesocks");
                 Console.WriteLine("** License: https://opensource.org/licenses/MIT");
                 Console.WriteLine();
 
-                var settings = new AppSettings();
-                settings.PopulateFrom(cliArgs);
-
-                if (settings.ShowHelp)
-                {
-                    settings.WriteUsageOptions(Console.Out);
-                    return -2;
-                }
-
-                var serviceProvider = ServiceConfiguration.CreateServiceProvider(settings);
-
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger(typeof(Program).Name);
-
-                    logger.LogInformation("Starting version " + s_Version);
-                    logger.LogInformation("** Press CTRL+C to shutdown.");
-                    settings.LogProperties(logger);
-
-                    using (var server = scope.ServiceProvider.GetRequiredService<SocksServer>())
-                    {
-                        server.Start();
-
-                        var waitHandle = new ManualResetEventSlim(false);
-                        Console.TreatControlCAsInput = false;
-                        Console.CancelKeyPress += delegate
-                        {
-                            Console.WriteLine("- CTRL+C pressed. Shutting down...");
-                            waitHandle.Set();
-                        };
-                        waitHandle.Wait();
-                    }
-                }
-
-                return 0;
+                var app = new CommandLineApplication<RootCommand>();
+                app.Conventions.UseDefaultConventions();
+                app.Conventions.AddConvention(new EnrichOptionsConvention());
+                return app.Execute(cliArgs);
             }
-            catch (OptionException ex)
+            catch (CommandParsingException ex)
             {
-                Console.Error.WriteLine("Invalid arguments: " + ex.Message);
-                Console.Error.WriteLine("Run with -h for help.");
+                Console.Error.WriteLine(ex.Message);
                 return -2;
             }
             catch (Exception ex)

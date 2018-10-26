@@ -22,8 +22,7 @@ namespace MangleSocks.Tests.Core.Server.DatagramInterceptors
         public async Task Random_packets_sent_only_before_first_packet_to_first_destination()
         {
             var settings = new RandomFirstSessionPrefixInterceptor.Settings { CountMin = 2, CountMax = 2 };
-            var interceptor = new RandomFirstSessionPrefixInterceptor(this._bufferPool, new NullLoggerFactory());
-            interceptor.ConfigureWith(settings);
+            var interceptor = new RandomFirstSessionPrefixInterceptor(this._bufferPool, settings, new NullLoggerFactory());
             var client = new FakeUdpClient();
 
             var destinationEndPoint = FakeEndPoints.CreateRemote();

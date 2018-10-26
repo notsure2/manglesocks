@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using MangleSocks.Core.Server;
-using MangleSocks.Core.Util.Directory;
+using MangleSocks.Core.Server.DatagramInterceptors;
 using MangleSocks.Mobile.Forms;
+using MangleSocks.Mobile.Models;
 using MangleSocks.Mobile.ViewModels;
 using Plugin.Settings.Abstractions;
 using Xamarin.Forms;
@@ -26,7 +26,7 @@ namespace MangleSocks.Mobile.Pages
             this.InitializeComponent();
 
             this.LogLevelPicker.SelectedIndexChanged += UpdatePickerMeasurement;
-            this.UdpInterceptorPicker.SelectedIndexChanged += UpdatePickerMeasurement;
+            this.ModePicker.SelectedIndexChanged += UpdatePickerMeasurement;
         }
 
         static void UpdatePickerMeasurement(object sender, EventArgs args)
@@ -34,16 +34,26 @@ namespace MangleSocks.Mobile.Pages
             ((Picker)sender).InvalidateMeasureNonVirtual(InvalidationTrigger.MeasureChanged);
         }
 
-        void HandleUdpInterceptorSelectedIndexChanged(object sender, EventArgs e)
+        void HandleModePickerSelectedIndexChanged(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
-            var selectedItem = picker.SelectedItem.ToString();
+            var selectedMode = (ClientMode)picker.SelectedItem;
 
             this.UdpInterceptorSection.Clear();
 
             var currentSettings = this.ViewModel.AppSettings.DatagramInterceptorSettings;
-            var descriptor = ImplDescriptor.GetByNameOrNull<IDatagramInterceptor>(selectedItem);
-            var newSettingsInstance = descriptor.SettingsDescriptor?.CreateInstance();
+
+            object newSettingsInstance;
+            switch (selectedMode)
+            {
+                case ClientMode.UdpRandomFirstSessionPrefix:
+                    newSettingsInstance = new RandomFirstSessionPrefixInterceptor.Settings();
+                    break;
+
+                default:
+                    newSettingsInstance = null;
+                    break;
+            }
 
             if (newSettingsInstance == null)
             {

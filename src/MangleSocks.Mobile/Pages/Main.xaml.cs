@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using MangleSocks.Mobile.Messaging;
+using MangleSocks.Mobile.Models;
 using Plugin.Settings.Abstractions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -22,11 +23,11 @@ namespace MangleSocks.Mobile.Pages
             typeof(Main),
             ServiceStatus.Stopped);
 
-        public static readonly BindableProperty ListenEndPointProperty = BindableProperty.Create(
-            nameof(ListenEndPoint),
-            typeof(string),
+        public static readonly BindableProperty ListenPortProperty = BindableProperty.Create(
+            nameof(ListenPort),
+            typeof(ushort),
             typeof(Main),
-            "(unknown)");
+            (ushort)1081);
 
         readonly IMessagingCenter _messagingCenter;
         readonly ISettings _settings;
@@ -45,10 +46,10 @@ namespace MangleSocks.Mobile.Pages
             set => this.SetValue(StatusProperty, value);
         }
 
-        public string ListenEndPoint
+        public ushort ListenPort
         {
-            get => (string)this.GetValue(ListenEndPointProperty);
-            set => this.SetValue(ListenEndPointProperty, value);
+            get => (ushort)this.GetValue(ListenPortProperty);
+            set => this.SetValue(ListenPortProperty, value);
         }
 
         public Main(IMessagingCenter messagingCenter, ISettings settings)
@@ -61,7 +62,7 @@ namespace MangleSocks.Mobile.Pages
 
         protected override void OnAppearing()
         {
-            this.ListenEndPoint = AppSettings.Get(this._settings).ListenEndPoint.ToString();
+            this.ListenPort = AppSettingsModel.LoadFrom(this._settings).ListenPort;
 
             this._messagingCenter.Subscribe<Application, ServiceStatusUpdate>(
                 this,

@@ -33,7 +33,7 @@ namespace MangleSocks.Core.Util
                 if (!ushort.TryParse(endPointExpression.Substring(indexOfLastColon + 1), out port)
                     || port > IPEndPoint.MaxPort)
                 {
-                    throw new ArgumentOutOfRangeException("Invalid port number", nameof(endPointExpression));
+                    throw new ArgumentOutOfRangeException(nameof(endPointExpression), "Invalid port number");
                 }
             }
 

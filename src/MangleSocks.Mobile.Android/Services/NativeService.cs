@@ -1,17 +1,22 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Net;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Util;
 using Java.Lang;
 using MangleSocks.Core.Server;
-using MangleSocks.Core.Settings;
+using MangleSocks.Mobile.Bootstrap;
 using MangleSocks.Mobile.Messaging;
+using MangleSocks.Mobile.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using Xamarin.Forms;
 using Exception = System.Exception;
 using FormsApplication = Xamarin.Forms.Application;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using Log = Android.Util.Log;
 
 namespace MangleSocks.Mobile.Droid.Services
 {
@@ -20,7 +25,7 @@ namespace MangleSocks.Mobile.Droid.Services
     {
         const int c_MaxLogMessages = 150;
 
-        readonly IAppSettings _settings;
+        readonly AppSettingsModel _settings;
         readonly ObservableCollection<ServiceLogMessage> _logMessages;
         readonly object _startLocker = new object();
 
@@ -41,7 +46,7 @@ namespace MangleSocks.Mobile.Droid.Services
 
         public NativeService()
         {
-            this._settings = AppSettings.Get(App.Settings);
+            this._settings = AppSettingsModel.LoadFrom(App.Settings);
             this._logMessages = new ObservableCollection<ServiceLogMessage>();
         }
 
@@ -68,7 +73,9 @@ namespace MangleSocks.Mobile.Droid.Services
                                     this._logMessages.Add(logMessage);
                                 }));
 
-                        var serviceProvider = ServiceConfiguration.CreateServiceProvider(this._settings);
+                        var listenEndPoint = new IPEndPoint(IPAddress.Loopback, this._settings.ListenPort);
+                        var serviceProvider = this.CreateServiceProvider();
+
                         this._serviceScope = serviceProvider.CreateScope();
                         log = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(this.GetType().Name);
 
@@ -76,7 +83,7 @@ namespace MangleSocks.Mobile.Droid.Services
                         socksServer.Start();
 
                         var notification = new Notification.Builder(this)
-                            .SetSubText(this._settings.ListenEndPoint.ToString())
+                            .SetSubText(listenEndPoint.ToString())
                             .SetVisibility(NotificationVisibility.Secret)
                             .SetSmallIcon(Resource.Drawable.ic_stat_socks)
                             .SetContentIntent(
@@ -109,6 +116,13 @@ namespace MangleSocks.Mobile.Droid.Services
 
                 return StartCommandResult.Sticky;
             }
+        }
+
+        IServiceProvider CreateServiceProvider()
+        {
+            return MobileServiceConfiguration.CreateServiceProvider(
+                this._settings,
+                config => config.WriteTo.AndroidLog(outputTemplate: "{Scope} {Message}{NewLine}{Exception}"));
         }
 
         public override IBinder OnBind(Intent intent)
